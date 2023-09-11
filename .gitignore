@@ -1,3 +1,8 @@
+# My custom gitignore file for Python projects
+meta.py
+test.*
+tempCodeRunnerFile.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
