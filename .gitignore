@@ -1,5 +1,5 @@
 # My custom gitignore file for Python projects
-meta.py
+remove*
 test.*
 tempCodeRunnerFile.py
 
