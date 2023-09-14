@@ -64,11 +64,11 @@ class DCList: # notation as Doubly Circular Linked List
         self.length -= 1
         return data
     
-    def sort(self):
+    def sort(self, reverse=False):
         if self.head is None:
             return
 
-        sorted_nodes = sorted(self, key=lambda node: str(node.data))
+        sorted_nodes = sorted(self, key=lambda node: str(node.data), reverse=reverse)
 
         self.head = sorted_nodes[0]
         current = self.head
@@ -79,6 +79,25 @@ class DCList: # notation as Doubly Circular Linked List
         self.tail = current
         self.tail.next = self.head
         self.head.prev = self.tail
+    
+    def copy_sorted(self, reverse=False):
+        # return a new sorted DCList's copy
+        if self.head is None:
+            return DCList()
+        
+        sorted_nodes = sorted(self, key=lambda node: str(node.data), reverse=reverse)
+        new_list = DCList()
+        new_list.head = sorted_nodes[0]
+        current = new_list.head
+        for next_node in sorted_nodes[1:]:
+            current.next = next_node
+            next_node.prev = current
+            current = next_node
+        new_list.tail = current
+        new_list.tail.next = new_list.head
+        new_list.head.prev = new_list.tail
+        new_list.length = self.length
+        return new_list
     
     def is_empty(self):
         return True if self.length == 0 else False
@@ -211,6 +230,16 @@ class MusicList(DCList):
     
     def name(self, index: int):
         return self.path(index).split('\\')[-1].split('.')[0]
-    
+
 if __name__ == "__main__":
-    raise RuntimeError("This module is not meant to run on its own!")
+    lst = DCList()
+    lst.append(1)
+    lst.append(2)
+    lst.append(2.5)
+    lst.append(3)
+    lst.append(4)
+    lst.append("5")
+    lst.append(5)
+    lst.sort()
+    print(lst)
+    # raise RuntimeError("This module is not meant to run on its own!")
