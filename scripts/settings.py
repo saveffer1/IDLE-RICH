@@ -81,5 +81,18 @@ toggle_hashed = {
     "rect":pygame.image.load('assets/gui/tg_rect.png')
 }
 
+
+# Slot Machine assets
+slot_img = {
+    "banana": pygame.image.load('assets/slot/item/banana.png'),
+    "bigprize": pygame.image.load('assets/slot/item/bigprize.png'),
+    "cherry": pygame.image.load('assets/slot/item/cherry.png'),
+    "freespin": pygame.image.load('assets/slot/item/freespin.png'),
+    "game": pygame.image.load('assets/slot/item/game.png'),
+    "jackpot": pygame.image.load('assets/slot/item/jackpot.png'),
+    "lemon": pygame.image.load('assets/slot/item/lemon.png'),
+    "wildcard": pygame.image.load('assets/slot/item/wildcard.png')
+}
+
 if __name__ == "__main__":
     raise RuntimeError("This module is not meant to run on its own!")
