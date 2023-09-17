@@ -3,6 +3,8 @@ from configparser import ConfigParser
 import pygame
 import os
 from datakit import *
+from translator import Translator
+import json
 
 # main font
 FONT = os.path.join('assets', "fonts", "DM Academy.ttf")
@@ -93,6 +95,12 @@ slot_img = {
     "lemon": pygame.image.load('assets/slot/item/lemon.png'),
     "wildcard": pygame.image.load('assets/slot/item/wildcard.png')
 }
+
+current_language = config.get("LANGUAGE", "CURRENT_LANGUAGE")
+translator = Translator(current_lang=current_language)
+translator.load_translations(os.path.join("config", "translations.json"))
+
+tl = translator.translate
 
 if __name__ == "__main__":
     raise RuntimeError("This module is not meant to run on its own!")

@@ -4,12 +4,15 @@ from settings import *
 from gamestate import *
 import threading
 
+
+
+
 class Game:
     def __init__(self):
         pygame.init()
         mixer.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN if config.getboolean("GRAPHIC", "FULL_SCREEN") else 0)
-        self.title = pygame.display.set_caption("Idle Rich")
+        self.title = pygame.display.set_caption(tl("title"))
         self.icon = pygame.image.load(os.path.join("assets", "logo", "LOGO.png"))
         self.menu_music = msc_menu[config.getint("AUDIO", "MUSIC_MENU")]
         self.game_music = msc_ingame[config.getint("AUDIO", "MUSIC_INGAME")]
@@ -22,7 +25,7 @@ class Game:
             "loading": LoadingStage(self),
         }
         
-        self.current_state = "loading"
+        self.current_state = tl("loading")
         self.prev_state = None
         
         self.loading_complete = threading.Event()

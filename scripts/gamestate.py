@@ -57,7 +57,7 @@ class LoadingStage(GameState):
                 self.loading_animation = ""
             
             self.surface.fill((0,0,0))
-            textsurf = self.loading_font.render(f"Loading{self.loading_animation}", True, (255, 255, 255))
+            textsurf = self.loading_font.render(f"{tl('loading')}{self.loading_animation}", True, (255, 255, 255))
             textrect = textsurf.get_rect(center=self.game.screen.get_rect().center)
             self.surface.blit(textsurf, textrect)
         
@@ -79,10 +79,10 @@ class MainMenu(GameState):
         self.background = pygame.image.load(os.path.join("assets", "LOGO", "BG2.png"))
         
         # GUI
-        self.btn_play = TextButton(text="Play", x=870, y=200)
-        self.btn_option = TextButton(text="Options", x= 870, y=300)
-        self.btn_credit = TextButton(text="Credit", x=870, y=400)
-        self.btn_quit = TextButton(text="Quit", x=870, y=500)
+        self.btn_play = TextButton(text=tl("btn_play"), x=870, y=200)
+        self.btn_option = TextButton(text=tl("btn_option"), x= 870, y=300)
+        self.btn_credit = TextButton(text=tl("btn_credit"), x=870, y=400)
+        self.btn_quit = TextButton(text=tl("btn_quit"), x=870, y=500)
         
         # Packed GUI
         self.all_btn = (self.btn_play, self.btn_option, self.btn_credit, self.btn_quit)
@@ -185,13 +185,13 @@ class OptionMenu(GameState):
         self.option_rect = pygame.image.load(os.path.join("assets", "BG", "window.png"))
         
         # GUI
-        self.option_label = Label("Options", font_size=60, x=550, y=60)
-        self.music_label = Label("Music Volume", font_size=40, x=350, y=160)
-        self.sfx_label = Label("SFX Volume", font_size=40, x=350, y=240)
-        self.menumsc_label = Label("Menu Music", font_size=40, x=350, y=300)
-        self.gamemsc_label = Label("Game Music", font_size=40, x=350, y=360)
-        self.fullscr_label = Label("Full Screen", font_size=40, x=350, y=450)
-        self.clrsav_label = Label("Clear Save", font_size=40, x=350, y=520)
+        self.option_label = Label(tl("lbl_options"), font_size=60, x=550, y=60)
+        self.music_label = Label(tl("lbl_music"), font_size=40, x=350, y=160)
+        self.sfx_label = Label(tl("lbl_sfx"), font_size=40, x=350, y=240)
+        self.menumsc_label = Label(tl("lbl_menumsc"), font_size=40, x=350, y=300)
+        self.gamemsc_label = Label(tl("lbl_gamemsc"), font_size=40, x=350, y=360)
+        self.fullscr_label = Label(tl("lbl_fullscr"), font_size=40, x=350, y=450)
+        self.clrsav_label = Label(tl("lbl_clearsav"), font_size=40, x=350, y=520)
         self.toggle_fullscreen = ToggleButton(x=725, y=450, callback=Options.toggle_fullscreen)
         
         self.music_slider = RangeSlider(start_value=config.getint("AUDIO", "MUSIC_VOLUME"), x=600, y=200, range_width=300, callback=Options.set_music_volume)
@@ -310,21 +310,7 @@ class CreditMenu(GameState):
         self.centery = self.surface.get_rect().centery
         self.deltaY = self.centery + 50
         
-        self.credit_text = """
-        Project Name: Idle Rich
-        
-        Concept: Idle clicker & slot machine casino game
-        
-        
-        This game is made by: Wiraphat Prasomphong
-        
-        Faculty of Engineering, KMITL
-        
-        Computer Engineering Continue (CEDT), 65015143
-        
-        01076110 Object Oriented Data Structures Project
-
-        """
+        self.credit_text = tl("credit")
     
     def handle_events(self, events):
         for event in events:

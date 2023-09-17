@@ -1,0 +1,36 @@
+{
+    "en":{
+        "title": "Idle Rich",
+        "loading": "Loading",
+        "btn_play": "Play",
+        "btn_option": "Option",
+        "btn_credit": "Credit",
+        "btn_quit": "Quit",
+        "btn_back": "Back",
+        "lbl_options": "Options",
+        "lbl_music": "Music Volume",
+        "lbl_sfx": "SFX Volume",
+        "lbl_menumsc": "Menu Music",
+        "lbl_gamemsc": "Game Music",
+        "lbl_fullscr": "Fullscreen",
+        "lbl_clearsav": "Clear Save",
+        "credit": "Project Name: Idle Rich\nConcept: Idle clicker & slot machine casino game\nThis game is made by: Wiraphat Prasomphong\n\nFaculty of Engineering, KMITL\nComputer Engineering Continue (CEDT), 65015143\n01076110 Object Oriented Data Structures Project"
+    },
+    "th":{
+        "title": "ไอเดิลริช",
+        "loading": "กำลังโหลด",
+        "btn_play": "เล่น",
+        "btn_option": "ตั้งค่า",
+        "btn_credit": "เครดิต",
+        "btn_quit": "ออก",
+        "btn_back": "กลับ",
+        "lbl_options": "การตั้งค่า",
+        "lbl_music": "เสียงเพลง",
+        "lbl_sfx": "เสียงอื่นๆ",
+        "lbl_menumsc": "เพลงหน้าเมนู",
+        "lbl_gamemsc": "เพลงในเกม",
+        "lbl_fullscr": "เต็มจอ",
+        "lbl_clearsav": "ล้างข้อมูล",
+        "credit": "ชื่อโปรเจค: ไอเดิลริช\nคอนเซ็ปต์: เกมส์คลิกเก็บเงินและเกมส์สล็อต\nผู้จัดทำ: วีรภัทร ประสมพงษ์\n\nคณะวิศวกรรมศาสตร์ สาขาวิศวกรรมคอมพิวเตอร์\nหลักสูตรต่อเนื่อง(CEDT), 65015143\n01076110 โครงงานโครงสร้างข้อมูลแบบเชิงวัตถุ"
+    }
+}
