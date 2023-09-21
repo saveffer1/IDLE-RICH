@@ -21,29 +21,20 @@ class SlotSystem:
         self.min_bet = min_bet
         self.max_bet = 15 * min_bet
         
-        #0
-        self.banana = SlotItem("🍌", pygame.image.load('assets/slot/item/banana.png'), 20, "price", {3:25, 4:50, 5:200})
-        #1
-        self.grape = SlotItem("🍇", pygame.image.load('assets/slot/item/grape.png'), 20, "price", {3:25, 4:50, 5:200})
-        #2
-        self.cherry = SlotItem("🍒", pygame.image.load('assets/slot/item/cherry.png'), 15, "price", {3:15, 4:45, 5:150})
-        #3
-        self.lemon = SlotItem("🍋", pygame.image.load('assets/slot/item/lemon.png'), 15, "price", {3:15, 4:45, 5:150})
-        #4
+        self.banana = SlotItem("🍌", pygame.image.load('assets/slot/item/banana.png'), 15, "price", {3:25, 4:50, 5:200})
+        self.grape = SlotItem("🍇", pygame.image.load('assets/slot/item/grape.png'), 15, "price", {3:25, 4:50, 5:200})
+        self.cherry = SlotItem("🍒", pygame.image.load('assets/slot/item/cherry.png'), 20, "price", {3:15, 4:45, 5:150})
+        self.lemon = SlotItem("🍋", pygame.image.load('assets/slot/item/lemon.png'), 20, "price", {3:15, 4:45, 5:150})
         self.bigprize = SlotItem("💰", pygame.image.load('assets/slot/item/bigprize.png'), 5, "price", {3:150, 4:250, 5:500})
-        #5
         self.scatter = SlotItem("🎲", pygame.image.load('assets/slot/item/freespin.png'), 10, "scatter", {3:25, 4:50, 5:200})
-        #6
         self.bonusgame = SlotItem("🃏", pygame.image.load('assets/slot/item/game.png'), 5, "bonus", {3:150, 4:250, 5:500})
-        #7
         self.jackpot = SlotItem("👑", pygame.image.load('assets/slot/item/jackpot.png'), 2, "price", {3:250, 4:500, 5:2000})
-        #8
         self.wild = SlotItem("🍀", pygame.image.load('assets/slot/item/wildcard.png'), 8, "wild", {3:15, 4:45, 5:150})
         
         self.normal_reel = [
             self.banana, self.grape, self.cherry, 
-            self.lemon, self.bigprize, self.jackpot, 
-            self.bonusgame, self.scatter, self.wild
+            self.lemon, self.bigprize, self.scatter,
+            self.bonusgame, self.jackpot, self.wild
         ]
         
         self.no_wild_reel = [
@@ -67,56 +58,26 @@ class SlotSystem:
             [0, 1, 2, 1, 0]
         ]
     
-        self.reset_reel()
-        self.reels = [
-            self.first_reel, 
-            self.second_reel, 
-            self.third_reel, 
-            self.fourth_reel, 
-            self.fifth_reel
-        ]
-
-    def reset_reel(self):
-        self.first_reel = self.no_wild_reel.copy()
-        self.second_reel = self.normal_reel.copy()
-        self.third_reel = self.normal_reel.copy()
-        self.fourth_reel = self.normal_reel.copy()
-        self.fifth_reel = self.no_wild_reel.copy()
-    
-    def calculate_rtp(self, wins, reels):
-        #FIXME: calculate rtp
-        total_payout = 0
-        winline = wins[0]
-        for win in wins:
-            symbol_id = reels[win[0][0]][win[0][1]]
-            if symbol_id in SlotItem.payout:
-                total_payout += SlotItem.payout[symbol_id]
-
-        total_bet = len(self.paylines)
-        rtp = (total_payout / total_bet) * 100
+    def calculate_rtp(self, item_id, duplicate_count, bet:int=None):
+        if bet == None:
+            bet = self.min_bet
+        rtp = 0
+        payout = self.normal_reel[item_id].payout[duplicate_count]
+        rtp = payout * (bet // len(self.normal_reel))
+        print("id:", item_id, " : ", self.normal_reel[item_id].symbol, "pay count: ", duplicate_count)
+        print("payout", payout)
+        print("rtp", rtp)
 
         return rtp
     
-    def check_for_wins(self, reels):
+    def check_for_wins(self, reels, bet:int=None):
         wins = []
         wild_symbol_id = self.wild.id
         specialobj = {
-            "wild": [],
-            "bonus": [],
-            "scatter": []
+            "bonus": set(),
+            "scatter": set()
         }
-        
-        for reel in range(5):
-            itemrow0 = reels[0][reel]
-            itemrow1 = reels[1][reel]
-            itemrow2 = reels[2][reel]
-            
-            if itemrow0.skill not in "price":
-                specialobj[itemrow0.skill].append((0, reel))
-            if itemrow1.skill not in "price":
-                specialobj[itemrow1.skill].append((1, reel))
-            if itemrow2.skill not in "price":
-                specialobj[itemrow2.skill].append((2, reel))
+        payout = 0
 
         for index, winline in enumerate(self.paylines):
             set_of_symbols = set()
@@ -124,6 +85,9 @@ class SlotSystem:
             for col, row in enumerate(winline):
                 current = reels[row][col]
                 prev = reels[winline[col - 1]][col - 1] if col != 0 else None
+                
+                if current.skill not in ["price", "wild"]:
+                    specialobj[current.skill].add((row, col))
                 
                 if current.id not in set_of_symbols and current.id != wild_symbol_id:
                     set_of_symbols.add(current.id)
@@ -142,17 +106,19 @@ class SlotSystem:
                                 duplicate_between[reels[winline[col - 2]][col - 2].id] += 1
                             else:
                                 duplicate_between[reels[winline[col - 3]][col - 3].id] += 1
-                            
+            
+            max_key, max_value = max(duplicate_between.items(), key=lambda x: x[1])
             if len(set_of_symbols) <= 1:
                 wins.append(winline)
+                payout += self.calculate_rtp(max_key, max_value, bet)
             else:
-                for k, v in duplicate_between.items():
-                    if v >= 3:
-                        wins.append(winline)
-                        break
-            print("winline", index+1, duplicate_between)
+                max_duplicate = max(duplicate_between.values())
+                if max_duplicate >= 3:
+                    wins.append(winline)
+                    payout += self.calculate_rtp(max_key, max_value, bet)
+                    continue
             
-        return wins, specialobj
+        return wins, payout, specialobj
                     
     def print_slot_machine(self, randreels, id_format=False):
         symlenght = 21 if id_format else 26
@@ -176,7 +142,8 @@ class SlotSystem:
             raise Exception(f"Invalid bet amount. Bet must be between {self.min_bet} and {self.max_bet}")
         
         randreels = [[], [],[]]
-        for reel in self.reels:
+        for i in range(5):
+            reel = self.no_wild_reel if i == 0 or i == 4 else self.normal_reel
             col0 = random.choices(reel, weights=[item.probability for item in reel])[0]
             col1 = random.choices(reel, weights=[item.probability for item in reel])[0]
             col2 = random.choices(reel, weights=[item.probability for item in reel])[0]
@@ -185,12 +152,12 @@ class SlotSystem:
             randreels[1].append(col1)
             randreels[2].append(col2)
 
-        # self.print_slot_machine(randreels)
-        self.print_slot_machine(randreels, id_format=True)
-        wins = self.check_for_wins(randreels)
-        prize = 0#self.calculate_rtp(wins, randreels)
+        wins = self.check_for_wins(randreels, bet)
         
-        print(wins[0])
+        self.print_slot_machine(randreels, id_format=False)
+        print("Winlines: ", wins[0])
+        print("Prize: ", wins[1])
+        print(f"Special: bonus-level({len(wins[2]['bonus'])}) freespin({len(wins[2]['scatter'])})")
 
 if __name__ == "__main__":
     slot = SlotSystem(100)
