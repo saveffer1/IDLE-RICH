@@ -1,6 +1,6 @@
 # My custom gitignore file for Python projects
 remove*
-test.*
+test*
 tempCodeRunnerFile.py
 *.drawio
 
