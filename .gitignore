@@ -3,6 +3,7 @@ remove*
 test*
 tempCodeRunnerFile.py
 *.drawio
+*.psd
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
