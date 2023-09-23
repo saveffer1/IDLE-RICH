@@ -229,7 +229,7 @@ class MusicList(DCList):
             return current.data
     
     def name(self, index: int):
-        return self.path(index).split('\\')[-1].split('.')[0]
+        return self.path(index).split('/')[-1].split('.')[0]
 
 if __name__ == "__main__":
     lst = DCList()
