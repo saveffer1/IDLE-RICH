@@ -10,6 +10,26 @@ from pgui import *
 from system import *
 
 class GameState:
+    """
+    Base class for all game states
+    
+    Attributes:
+    -----------
+    game : Game
+        The game object that this state belongs to
+    surface : pygame.Surface
+        The surface object of the game window
+    display_info : pygame.DisplayInfo
+        The display information object of the game window
+    surf_width : int
+        The width of the game window
+    surf_height : int
+        The height of the game window
+    clock : pygame.time.Clock
+        The clock object used to control the game's frame rate
+    fps : int
+        The target frame rate of the game
+    """
     def __init__(self, game):
         self.game = game
         self.surface = pygame.display.get_surface()
@@ -20,17 +40,41 @@ class GameState:
         self.fps = 60
         
     def handle_events(self, events):
+        """
+        Handles events for the GameState object
+        
+        Parameters:
+        -----------
+        events : list
+            A list of pygame events to be handled
+        """
         pass
 
     def update(self):
+        """
+        Updates the GameState object
+        """
         self.display_info = pygame.display.Info()
         self.surf_width = self.display_info.current_w
         self.surf_height = self.display_info.current_h
     
     def render(self):
+        """
+        Renders the GameState object
+        """
         pass
     
     def play_sound(self, sound:str, type:str):
+        """
+        Plays a sound effect or music
+        
+        Parameters:
+        -----------
+        sound : str
+            The path to the sound file to be played
+        type : str
+            The type of sound to be played, either 'music' or 'sfx'
+        """
         try:
             mixer.music.load(sound)
             if type.lower() == "music":
@@ -41,9 +85,22 @@ class GameState:
                 raise ValueError("Invalid sound type only 'music' or 'sfx'")
         except:
             raise FileNotFoundError("Sound file not found or invalid file type")
-        mixer.music.play()    
+        mixer.music.play()
 
 class LoadingStage(GameState):
+    """
+    A class representing the loading stage of the game.
+    
+    Attributes:
+    -----------
+    game : Game
+        The instance of the Game class.
+    loading_font : pygame.font.Font
+        The font used for the loading text.
+    loading_animation : str
+        The animation displayed during loading.
+    """
+    
     def __init__(self, game):
         super().__init__(game)
         
@@ -51,6 +108,9 @@ class LoadingStage(GameState):
         self.loading_animation = ""
         
     def load(self):
+        """
+        Loads the game while displaying a loading animation.
+        """
         while self.game.loading_complete.is_set():
             self.loading_animation += "."
             if len(self.loading_animation) > 3:
@@ -76,7 +136,7 @@ class MainMenu(GameState):
         super().__init__(game)
         
         # Assets
-        self.background = pygame.image.load(os.path.join("assets", "LOGO", "BG2.png"))
+        self.background = pygame.image.load(os.path.join(data_path, "assets", "LOGO", "BG2.png"))
         
         # GUI
         self.btn_play = TextButton(text=tl("btn_play"), x=870, y=200)
@@ -103,7 +163,7 @@ class MainMenu(GameState):
                         GUI.clicked_sound(SOUND_START, addition_vol=0.3)
                         self.game.menu_music.stop()
                         self.game.game_music.play(-1)
-                        self.game.change_state("game_play")
+                        self.game.change_state("lobby")
                     if self.btn_option.clicked():
                         GUI.clicked_sound(SOUND_BTNCLICK)
                         self.game.menu_music.stop()
@@ -181,8 +241,8 @@ class OptionMenu(GameState):
         super().__init__(game)
         # Assets
         self.test_music = msc_ingame[0]
-        self.background = pygame.image.load(os.path.join("assets", "BG", "screen.png"))
-        self.option_rect = pygame.image.load(os.path.join("assets", "BG", "window.png"))
+        self.background = pygame.image.load(os.path.join(data_path, "assets", "BG", "screen.png"))
+        self.option_rect = pygame.image.load(os.path.join(data_path, "assets", "BG", "window.png"))
         
         # GUI
         self.option_label = Label(tl("lbl_options"), font_size=60, x=550, y=60)
@@ -301,8 +361,8 @@ class CreditMenu(GameState):
         super().__init__(game)
         
         # Assets
-        self.background = pygame.image.load(os.path.join("assets", "BG", "screen.png"))
-        self.credit_music = pygame.mixer.Sound(os.path.join("assets", "audio", "music", "credit.mp3"))
+        self.background = pygame.image.load(os.path.join(data_path, "assets", "BG", "screen.png"))
+        self.credit_music = pygame.mixer.Sound(os.path.join(data_path, "assets", "audio", "music", "credit.mp3"))
         
         self.btn_back = IMGButton(type="close", x=25, y=25)
         
@@ -367,6 +427,39 @@ class CreditMenu(GameState):
         pygame.display.update()
         self.clock.tick(self.fps)
 
+class Lobby(GameState):
+    def __init__(self, game):
+        super().__init__(game)
+        
+        self.background = pygame.image.load(os.path.join(data_path, "assets/BG/screen.png"))
+        self.navbar = pygame.image.load(os.path.join(data_path, "assets/gui/lobby-nav.png"))
+        self.btn_buy = TextButton(text=tl("btn_buy"), x=870, y=20)
+        self.btn_pause = TextButton(text=tl("btn_option"), x=870, y=100)
+    
+    def handle_events(self, events):
+        for event in events:
+            Options.handle_pygame_event(event)
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    self.game.game_music.stop()
+                    self.game.menu_music.play(-1)
+                    self.game.change_state("main_menu")
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    self.mouse_clicked = True
+
+    def update(self):
+        pass
+    
+    def render(self):
+        self.surface.fill("#000000")
+        self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        self.surface.blit(self.navbar, (0, 0))
+        
+        
+        pygame.display.update()
+        self.clock.tick(self.fps)
+
 class GamePlay(GameState):
     def __init__(self, game):
         super().__init__(game)
@@ -399,7 +492,6 @@ class GamePlay(GameState):
     
     def update_slot_state(self):
         pass
-
 
     def update(self):
         self.game.menu_music.stop()
