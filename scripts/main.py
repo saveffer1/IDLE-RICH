@@ -4,9 +4,6 @@ from settings import *
 from gamestate import *
 import threading
 
-
-
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -48,6 +45,7 @@ class Game:
             "pause_menu": PauseMenu(self),
             "option_menu": OptionMenu(self),
             "credit_menu": CreditMenu(self),
+            "lobby": Lobby(self),
             "game_play": GamePlay(self)
         }
         self.loading_complete.clear()
