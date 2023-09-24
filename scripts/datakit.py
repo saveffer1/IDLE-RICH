@@ -232,14 +232,4 @@ class MusicList(DCList):
         return self.path(index).split('/')[-1].split('.')[0]
 
 if __name__ == "__main__":
-    lst = DCList()
-    lst.append(1)
-    lst.append(2)
-    lst.append(2.5)
-    lst.append(3)
-    lst.append(4)
-    lst.append("5")
-    lst.append(5)
-    lst.sort()
-    print(lst)
-    # raise RuntimeError("This module is not meant to run on its own!")
+    raise RuntimeError("This module is not meant to run on its own!")
