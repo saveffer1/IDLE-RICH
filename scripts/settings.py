@@ -10,20 +10,20 @@ script_directory = os.path.dirname(__file__)
 data_path = os.path.join(script_directory, "..")
 
 # main font
-FONT =os.path.join(data_path,data_path,"assets", "fonts", "DM Academy.ttf")
-FONT_ICON =os.path.join(data_path,data_path,'assets', "fonts", "MaterialIcons-Regular.ttf")
+FONT = os.path.join(data_path,data_path,"assets", "fonts", "DM Academy.ttf")
+FONT_ICON = os.path.join(data_path,data_path,'assets', "fonts", "MaterialIcons-Regular.ttf")
 
 # load config file
 config = ConfigParser()
-config.read(os.path.join(data_path,'config', 'config.ini'))
+config.read(os.path.join(data_path,'config/config.ini'))
 
 # screen
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
 # load save file
-# SAVEPATH =os.path.join(data_path,data_path,'config/savefile.sav')
-SAVEPATH = os.path.join(data_path,data_path,'config/save.json')
+SAVEPATH = os.path.join(data_path,data_path,'config/savefile.sav')
+# SAVEPATH = os.path.join(data_path,data_path,'config/save.json')
 
 # load sfx file
 mixer.init()
@@ -51,6 +51,10 @@ text_button_hashed = {
         "active":pygame.image.load(os.path.join(data_path,'assets/gui/btn_empty_active.png')),
         "inactive":pygame.image.load(os.path.join(data_path,'assets/gui/btn_empty.png'))
     },
+    "buy_button":{
+        "active":pygame.image.load(os.path.join(data_path,'assets/gui/btn_buycoins_active.png')),
+        "inactive":pygame.image.load(os.path.join(data_path,'assets/gui/btn_buycoins.png'))
+    },
     "ciclebtn":{
         "active":pygame.image.load(os.path.join(data_path,'assets/gui/circle_btn_active.png')),
         "inactive":pygame.image.load(os.path.join(data_path,'assets/gui/circle_btn.png'))
@@ -73,6 +77,10 @@ button_hashed = {
     "delsave":{
         "active":pygame.image.load(os.path.join(data_path,'assets/gui/delsave_active.png')),
         "inactive":pygame.image.load(os.path.join(data_path,'assets/gui/delsave.png'))
+    },
+    "buy":{
+        "active":pygame.image.load(os.path.join(data_path,'assets/gui/buy_credit_active.png')),
+        "inactive":pygame.image.load(os.path.join(data_path,'assets/gui/buy_credit.png'))
     }
 }
 
@@ -87,17 +95,17 @@ toggle_hashed = {
 }
 
 
-# Slot Machine assets
-slot_img = {
-    "banana": pygame.image.load(os.path.join(data_path,'assets/slot/item/banana.png')),
-    "bigprize": pygame.image.load(os.path.join(data_path,'assets/slot/item/bigprize.png')),
-    "cherry": pygame.image.load(os.path.join(data_path,'assets/slot/item/cherry.png')),
-    "freespin": pygame.image.load(os.path.join(data_path,'assets/slot/item/freespin.png')),
-    "game": pygame.image.load(os.path.join(data_path,'assets/slot/item/game.png')),
-    "jackpot": pygame.image.load(os.path.join(data_path,'assets/slot/item/jackpot.png')),
-    "lemon": pygame.image.load(os.path.join(data_path,'assets/slot/item/lemon.png')),
-    "wildcard": pygame.image.load(os.path.join(data_path,'assets/slot/item/wildcard.png'))
-}
+# # Slot Machine assets
+# slot_img = {
+#     "banana": pygame.image.load(os.path.join(data_path,'assets/slot/item/banana.png')),
+#     "bigprize": pygame.image.load(os.path.join(data_path,'assets/slot/item/bigprize.png')),
+#     "cherry": pygame.image.load(os.path.join(data_path,'assets/slot/item/cherry.png')),
+#     "freespin": pygame.image.load(os.path.join(data_path,'assets/slot/item/freespin.png')),
+#     "game": pygame.image.load(os.path.join(data_path,'assets/slot/item/game.png')),
+#     "jackpot": pygame.image.load(os.path.join(data_path,'assets/slot/item/jackpot.png')),
+#     "lemon": pygame.image.load(os.path.join(data_path,'assets/slot/item/lemon.png')),
+#     "wildcard": pygame.image.load(os.path.join(data_path,'assets/slot/item/wildcard.png'))
+# }
 
 current_language = config.get("LANGUAGE", "CURRENT_LANGUAGE")
 translator = Translator(current_lang=current_language)
