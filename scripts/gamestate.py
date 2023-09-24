@@ -111,6 +111,7 @@ class LoadingStage(GameState):
         """
         Loads the game while displaying a loading animation.
         """
+        load_count = 0
         while self.game.loading_complete.is_set():
             self.loading_animation += "."
             if len(self.loading_animation) > 3:
@@ -129,7 +130,10 @@ class LoadingStage(GameState):
             pygame.display.update()
             self.clock.tick(self.fps)
             
+            load_count += 1
             pygame.time.delay(500)
+            if load_count >= 120:
+                raise TimeoutError("Error loading timout")
 
 class MainMenu(GameState):
     def __init__(self, game):
@@ -472,6 +476,9 @@ class Lobby(GameState):
                         self.game.game_music.stop()
                         self.game.menu_music.play(-1)
                         self.pause_panel.pause_state = True
+                    if self.btn_playslot.clicked():
+                        GUI.clicked_sound(SOUND_BTNCLICK)
+                        self.game.change_state("game_play")
                 else:
                     self.mouse_clicked = False
             
@@ -524,55 +531,59 @@ class GamePlay(GameState):
     def __init__(self, game):
         super().__init__(game)
 
-        self.game_state = "idle" # now has idle, slot
-    
-    def handle_idle_state(self, event):
-        pass
-    
-    def handle_slot_state(self, event):
-        if event.type == MOUSEBUTTONDOWN:
-            if event.button == 1:
-                self.mouse_clicked = True
+        self.alpha_background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self.alpha_background.fill((0, 0, 0, 128))
+        
+        self.background = pygame.image.load(os.path.join(data_path, "assets/BG/screen.png"))
+        self.frame = pygame.image.load(os.path.join(data_path, "assets/BG/back.png"))
+        
+        self.image_home = pygame.image.load(os.path.join(data_path, "assets/gui/home_btn.png"))
+        self.btn_home = pygame.Rect(20, 50, self.image_home.get_width(), self.image_home.get_height())
+        
+        self.image_info = pygame.image.load(os.path.join(data_path, "assets/gui/info_btn.png"))
+        self.btn_info = pygame.Rect(1100, 50, self.image_info.get_width(), self.image_info.get_height())
+        
+        self.image_paylines = pygame.image.load(os.path.join(data_path, "assets/gui/paylines.png"))
+        # self.paylines = pygame.Rect(0, 0, )
+        self.btn_paylines_close = IMGButton(type="close", x=self.image_paylines.get_width() - 200, y=80)
+        self.paylines_show = False
         
     def handle_events(self, events):
         for event in events:
             Options.handle_pygame_event(event)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    self.game.game_music.stop()
-                    self.game_data.update_save()
-                    self.game.change_state("pause_menu")
-            if self.game_state == "idle":
-                self.handle_idle_state(event)
-            elif self.game_state == "slot":
-                self.handle_slot_state(event)
-
-    def update_idle_state(self):
-        pass
+                    self.game.change_state("lobby_menu")
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1 and not self.paylines_show:
+                    if self.btn_home.collidepoint(event.pos):
+                        GUI.clicked_sound(SOUND_BTNCLICK)
+                        self.game.change_state("lobby_menu")
+                    if self.btn_info.collidepoint(event.pos):
+                        GUI.clicked_sound(SOUND_BTNCLICK)
+                        self.paylines_show = True
+                elif event.button == 1 and self.paylines_show:
+                    if self.btn_paylines_close.clicked():
+                        GUI.clicked_sound(SOUND_BTNCLICK)
+                        self.paylines_show = False
     
-    def update_slot_state(self):
-        pass
-
     def update(self):
-        self.game.menu_music.stop()
-        
-        if self.game_state == "idle":
-            self.update_idle_state()
-        elif self.game_state == "slot":
-            self.update_slot_state()
-
-    def render_idle_state(self):
-        self.surface.fill((217,189,165))
-        
-    def render_slot_state(self):
-        pass
+        self.btn_paylines_close.set_hover()
+        self.btn_paylines_close.collide_sound(SOUND_UISELECT)
     
     def render(self):
-        if self.game_state == "idle":
-            self.render_idle_state()
-        elif self.game_state == "slot":
-            self.render_slot_state()
+        self.surface.fill("#000000")
+        self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        self.surface.blit(self.frame, (0, 0))
+        self.surface.blit(self.image_home, self.btn_home)
+        self.surface.blit(self.image_info, self.btn_info)
         
+        
+        if self.paylines_show:
+            self.surface.blit(self.alpha_background, (0, 0))
+            self.surface.blit(self.image_paylines, (0, 0))
+            self.btn_paylines_close.draw()
+
         pygame.display.update()
         self.clock.tick(self.fps)
         
