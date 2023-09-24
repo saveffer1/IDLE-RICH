@@ -86,11 +86,11 @@ class IMGButton(GUI):
             self.image = self.inactive_image 
 
 class TextButton(IMGButton):
-    def __init__(self, text, font_size:int=50, type: str="button", x=0, y=0) -> None:
+    def __init__(self, text, font=None, font_size:int=50, type: str="button", x=0, y=0) -> None:
         super().__init__(x=x, y=y)
         
         self.imgrect = text_button_hashed[type]["active"].get_rect()
-        self.rect = self.rect = pygame.Rect(x, y, self.imgrect.width, self.imgrect.height)
+        self.rect = pygame.Rect(x, y, self.imgrect.width, self.imgrect.height)
         
         self.active_image = text_button_hashed[type]["active"]
         self.inactive_image = text_button_hashed[type]["inactive"]
@@ -100,12 +100,14 @@ class TextButton(IMGButton):
         self.bottom_rect = self.rect.copy()
         self.bottom_color = "#354B5E"
         
-        self.adjust_texty = 10
         self.text = text
         self.text_color = "#FFFFFF"
         self.outline_color = "#FF9600"
         self.font_size = font_size
-        self.font = pygame.font.Font(FONT, font_size)
+        if font is None:
+            self.font = pygame.font.Font(FONT, font_size)
+        else:
+            self.font = pygame.font.Font(font, font_size)
         self.text_surf = self.font.render(text, True, self.text_color)
         self.text_rect = self.text_surf.get_rect(center=self.rect.center)
         
@@ -119,19 +121,19 @@ class TextButton(IMGButton):
         outline_w, outline_h = outline_surf.get_size()
         
         self.top_rect.y = self.rect.y - self.dynamic_elevation
-        self.text_rect.center = (self.top_rect.centerx, self.top_rect.centery - self.adjust_texty)
+        self.text_rect.center = (self.top_rect.centerx, self.top_rect.centery)
         
         self.bottom_rect.midtop = self.top_rect.midtop
         self.bottom_rect.height = self.top_rect.height + self.dynamic_elevation
         
         pygame.draw.rect(self.surface, self.bottom_color, self.bottom_rect, border_radius=12)
         
-        self.surface.blit(self.image, self.top_rect)
+        self.surface.blit(pygame.transform.scale(self.image, self.top_rect.size), self.top_rect)
         
         # Create a text_surf with an outline
         self.text_surf = pygame.Surface((outline_w, outline_h), pygame.SRCALPHA)
-        self.text_surf.blit(outline_surf, (1, 1))  # Offset by (1, 1) for the outline effect
-        self.text_surf.blit(self.font.render(self.text, True, self.text_color), (0, 0))
+        self.text_surf.blit(outline_surf, (1, self.top_rect.height // 2 - outline_h // 2 + 1))
+        self.text_surf.blit(self.font.render(self.text, True, self.text_color), (0, self.top_rect.height // 2 - outline_h // 2))
         
         # Now, blit the text_surf onto the button's surface
         self.surface.blit(self.text_surf, self.text_rect)
@@ -142,6 +144,11 @@ class TextButton(IMGButton):
             self.dynamic_elevation = 0
         else:
             self.dynamic_elevation = self.elevation
+    
+    def resize(self, w, h):
+        self.rect = self.rect = pygame.Rect(self.x, self.y, w, h)
+        self.top_rect = self.rect.copy()
+        self.bottom_rect = self.rect.copy()
 
 class RangeSlider(GUI):
     def __init__(self, min_value: int=0, max_value: int=100,
@@ -294,3 +301,81 @@ class Selector(GUI):
 class YesNoPopup(GUI):
     def __init__(self, width=250, height=50, x=0, y=0) -> None:
         super().__init__(width, height, x, y)
+
+class Buy_Popup(GUI):
+    def __init__(self, width=250, height=50, x=0, y=0, val1=500, val2=2000, val3=5000) -> None:
+        super().__init__(width, height, x, y)
+        
+        self.val1 = val1
+        self.val2 = val2
+        self.val3 = val3
+        
+        self.alpha_background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self.alpha_background.fill((0, 0, 0, 128))
+        
+        self.shop_panel = pygame.image.load(os.path.join(data_path, "assets", "BG", "window.png"))
+        self.shop_panel_rect = self.shop_panel.get_rect()
+        self.shop_panel_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+        self.btn_close = IMGButton("close", x=self.shop_panel_rect.x + self.shop_panel_rect.width - 50, y=self.shop_panel_rect.y - 20)
+        
+        self.img_coin_1 = pygame.image.load(os.path.join(data_path, "assets/shop/Shop_Coin_1.png"))
+        self.img_coin_2 = pygame.image.load(os.path.join(data_path, "assets/shop/Shop_Coin_2.png"))
+        self.img_coin_3 = pygame.image.load(os.path.join(data_path, "assets/shop/Shop_Coin_3.png"))
+        
+        self.lbl_coin_1 = Label(f"{val1} coins", font_size=50, x=self.shop_panel_rect.x + 50, y=self.shop_panel_rect.y + 300)
+        self.lbl_coin_2 = Label(f"{val2} coins", font_size=50, x=self.shop_panel_rect.x + 350, y=self.shop_panel_rect.y + 300)
+        self.lbl_coin_3 = Label(f"{val3} coins", font_size=50, x=self.shop_panel_rect.x + 650, y=self.shop_panel_rect.y + 300)
+        
+        self.buy_btn_1 = TextButton("Buy", font_size=40, x=self.shop_panel_rect.x + 50, y=self.shop_panel_rect.y + 450, type="buy_button")
+        self.buy_btn_1.resize(200, 50)
+        self.buy_btn_2 = TextButton("Buy", font_size=40, x=self.shop_panel_rect.x + 350, y=self.shop_panel_rect.y + 450, type="buy_button")
+        self.buy_btn_2.resize(200, 50)
+        self.buy_btn_3 = TextButton("Buy", font_size=40, x=self.shop_panel_rect.x + 650, y=self.shop_panel_rect.y + 450, type="buy_button")
+        self.buy_btn_3.resize(200, 50)
+        
+        self.open = False
+    
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.btn_close.clicked():
+                GUI.clicked_sound(SOUND_BTNCLICK)
+                self.open = False
+            elif self.buy_btn_1.clicked():
+                GUI.clicked_sound(SOUND_COLLECT)
+                return self.val1
+            elif self.buy_btn_2.clicked():
+                GUI.clicked_sound(SOUND_COLLECT)
+                return self.val2
+            elif self.buy_btn_3.clicked():
+                GUI.clicked_sound(SOUND_COLLECT)
+                return self.val3
+            else:
+                return None
+    
+    def update(self):
+        self.btn_close.set_hover()
+        self.buy_btn_1.set_hover()
+        self.buy_btn_2.set_hover()
+        self.buy_btn_3.set_hover()
+    
+    def draw(self):
+        if self.open:
+            self.surface.blit(self.alpha_background, (0, 0))
+            self.surface.blit(self.shop_panel, self.shop_panel_rect)
+            
+            self.btn_close.draw()
+            self.lbl_coin_1.draw()
+            self.lbl_coin_2.draw()
+            self.lbl_coin_3.draw()
+            
+            self.buy_btn_1.draw()
+            self.buy_btn_2.draw()
+            self.buy_btn_3.draw()
+            
+            self.surface.blit(pygame.transform.scale(self.img_coin_1, (200, 200)), (self.shop_panel_rect.x + 50, self.shop_panel_rect.y + 100))
+            self.surface.blit(pygame.transform.scale(self.img_coin_2, (200, 200)), (self.shop_panel_rect.x + 350, self.shop_panel_rect.y + 100))
+            self.surface.blit(pygame.transform.scale(self.img_coin_3, (200, 200)), (self.shop_panel_rect.x + 650, self.shop_panel_rect.y + 100))
+
+if __name__ == "__main__":
+    raise RuntimeError("This module is not meant to run on its own!")
