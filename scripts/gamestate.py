@@ -163,7 +163,7 @@ class MainMenu(GameState):
                         GUI.clicked_sound(SOUND_START, addition_vol=0.3)
                         self.game.menu_music.stop()
                         self.game.game_music.play(-1)
-                        self.game.change_state("lobby")
+                        self.game.change_state("lobby_menu")
                     if self.btn_option.clicked():
                         GUI.clicked_sound(SOUND_BTNCLICK)
                         self.game.menu_music.stop()
@@ -196,45 +196,52 @@ class PauseMenu(GameState):
     def __init__(self, game):
         super().__init__(game)
         
+        self.alpha_background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self.alpha_background.fill((0, 0, 0, 128))
+        
+        self.btn_resume = TextButton(text=tl("btn_resume"), x=self.surf_width//2 - 212//2, y=200)
+        self.btn_option = TextButton(text=tl("btn_option"), x=self.surf_width//2 - 212//2, y=300)
+        self.btn_main_menu = TextButton(text=tl("btn_main_menu"), x=self.surf_width//2 - 212//2, y=400)
+        
+        self.pause_state = False
+        
+        self.all_btn = (self.btn_resume, self.btn_option, self.btn_main_menu)        
+        
     def handle_events(self, events):
         for event in events:
             Options.handle_pygame_event(event)
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    self.game.change_state("game_play")
+                    self.pause_state = False
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     self.mouse_clicked = True
-                    # if self.btn_resume.clicked():
-                    #     self.game.game_music.play(-1)
-                    #     self.game.change_state("game_play")
-                    # if self.btn_option.clicked():
-                    #     self.game.menu_music.play(-1)
-                    #     self.game.change_state("option_menu")
-                    # if self.btn_main_menu.clicked():
-                    #     self.game.menu_music.play(-1)
-                    #     self.game.change_state("main_menu")
+                    if self.btn_resume.clicked():
+                        self.game.game_music.play(-1)
+                        self.pause_state = False
+                    if self.btn_option.clicked():
+                        self.game.menu_music.play(-1)
+                        self.game.change_state("option_menu")
+                    if self.btn_main_menu.clicked():
+                        self.pause_state = False
+                        self.game.change_state("main_menu")
 
     def update(self):
-        self.mouse_clicked = False
-        
-        self.game.menu_music.stop()
-        
-        for btn in self.all_btn:
-            btn.collide_sound(SOUND_UISELECT)
-            btn.set_hover()
-            btn.set_elevate()
+        if self.pause_state:
+            self.game.menu_music.stop()
+            
+            for btn in self.all_btn:
+                if isinstance(btn, TextButton):
+                    btn.set_elevate()
+                btn.set_hover()
+                btn.collide_sound(SOUND_UISELECT)
 
     def render(self):
-        self.surface.fill((0, 0, 0))
-        
-        self.menutext.draw()
-        
-        for btn in self.all_btn:
-            btn.draw()
-        
-        pygame.display.update()
-        self.clock.tick(self.fps)
+        if self.pause_state:
+            # self.surface.blit(self.alpha_background, (0, 0))
+            self.surface.fill("#000000")
+            for btn in self.all_btn:
+                btn.draw()
 
 class OptionMenu(GameState):
     def __init__(self, game):
@@ -432,9 +439,18 @@ class Lobby(GameState):
         super().__init__(game)
         
         self.background = pygame.image.load(os.path.join(data_path, "assets/BG/screen.png"))
+        self.play_image = pygame.image.load(os.path.join(data_path, "assets/gui/lobby-play.png"))
         self.navbar = pygame.image.load(os.path.join(data_path, "assets/gui/lobby-nav.png"))
-        self.btn_buy = TextButton(text=tl("btn_buy"), x=870, y=20)
-        self.btn_pause = TextButton(text=tl("btn_option"), x=870, y=100)
+        self.btn_buy = IMGButton(type="buy", x=750, y=5)
+        self.btn_pause = TextButton(text="\ue5d2", font=FONT_ICON, x=1225, y=5)
+        self.btn_pause.resize(50, 50)
+        self.btn_playslot = TextButton(text=tl("btn_playslot"), x=self.surf_width//2 - 212//2, y=500)
+        
+        self.all_btn = [self.btn_buy, self.btn_playslot]
+    
+        # panel section
+        self.buy_panel = Buy_Popup(width=500, height=500, x=400, y=200)
+        self.pause_panel = PauseMenu(self.game)
     
     def handle_events(self, events):
         for event in events:
@@ -445,17 +461,61 @@ class Lobby(GameState):
                     self.game.menu_music.play(-1)
                     self.game.change_state("main_menu")
             if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
+                if event.button == 1 and not self.buy_panel.open and not self.pause_panel.pause_state:
                     self.mouse_clicked = True
+                    if self.btn_buy.clicked():
+                        GUI.clicked_sound(SOUND_BTNCLICK)
+                        self.game.game_music.stop()
+                        self.buy_panel.open = True
+                    if self.btn_pause.clicked():
+                        GUI.clicked_sound(SOUND_BTNCLICK)
+                        self.game.game_music.stop()
+                        self.game.menu_music.play(-1)
+                        self.pause_panel.pause_state = True
+                else:
+                    self.mouse_clicked = False
+            
+            if self.buy_panel.open and not self.pause_panel.pause_state:
+                amount = self.buy_panel.handle_event(event)
+                if amount != None:
+                    self.add_money(amount)
+            if self.pause_panel.pause_state and not self.buy_panel.open:
+                self.pause_panel.handle_events(events)
 
+    def add_money(self, amount):
+        print((type(amount)), amount)
+    
     def update(self):
-        pass
+        if not self.buy_panel.open and not self.pause_panel.pause_state:
+            self.btn_pause.set_hover()
+            self.btn_pause.collide_sound(SOUND_UISELECT)
+            for btn in self.all_btn:
+                if isinstance(btn, TextButton):
+                    btn.set_elevate()
+                btn.set_hover()
+                btn.collide_sound(SOUND_UISELECT)
+        
+        if self.buy_panel.open and not self.pause_panel.pause_state:
+            self.buy_panel.update()
+            
+        if self.pause_panel.pause_state and not self.buy_panel.open:
+            self.pause_panel.update()
     
     def render(self):
         self.surface.fill("#000000")
         self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
         self.surface.blit(self.navbar, (0, 0))
+        self.surface.blit(self.play_image, (self.surf_width//2 - self.play_image.get_width()//2, self.surf_height//2 - self.play_image.get_height()//2))
         
+        self.btn_pause.draw()
+        for btn in self.all_btn:
+            btn.draw()
+        
+        if self.buy_panel.open and not self.pause_panel.pause_state:
+            self.buy_panel.draw()
+        
+        if self.pause_panel.pause_state and not self.buy_panel.open:
+            self.pause_panel.render()
         
         pygame.display.update()
         self.clock.tick(self.fps)
