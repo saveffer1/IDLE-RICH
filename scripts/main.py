@@ -42,10 +42,9 @@ class Game:
         self.states = {
             "loading": LoadingStage(self),
             "main_menu": MainMenu(self),
-            "pause_menu": PauseMenu(self),
             "option_menu": OptionMenu(self),
             "credit_menu": CreditMenu(self),
-            "lobby": Lobby(self),
+            "lobby_menu": Lobby(self),
             "game_play": GamePlay(self)
         }
         self.loading_complete.clear()
