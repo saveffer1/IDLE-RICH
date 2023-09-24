@@ -8,6 +8,7 @@ import time
 from settings import *
 from pgui import *
 from system import *
+from slot import *
 
 class GameState:
     """
@@ -548,6 +549,11 @@ class GamePlay(GameState):
         self.btn_paylines_close = IMGButton(type="close", x=self.image_paylines.get_width() - 200, y=80)
         self.paylines_show = False
         
+        self.slot_machine = SlotMachine(100)
+        
+        self.start_time = pygame.time.get_ticks()
+        self.delta_time = 0
+        
     def handle_events(self, events):
         for event in events:
             Options.handle_pygame_event(event)
@@ -570,10 +576,16 @@ class GamePlay(GameState):
     def update(self):
         self.btn_paylines_close.set_hover()
         self.btn_paylines_close.collide_sound(SOUND_UISELECT)
+        
+        self.delta_time = (pygame.time.get_ticks() - self.start_time) / 1000
+        self.start_time = pygame.time.get_ticks()
     
     def render(self):
         self.surface.fill("#000000")
         self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        
+        self.slot_machine.update(self.delta_time)
+        
         self.surface.blit(self.frame, (0, 0))
         self.surface.blit(self.image_home, self.btn_home)
         self.surface.blit(self.image_info, self.btn_info)
