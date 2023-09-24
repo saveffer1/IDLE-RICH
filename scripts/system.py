@@ -6,6 +6,7 @@ import pickle
 import threading
 from settings import *
 import time
+from decimal import Decimal
 
 class Options:
     @staticmethod
@@ -54,6 +55,32 @@ class Options:
             Options.save_config()
             pygame.quit()
             sys.exit()
+
+class SaveData:
+    def __init__(self):
+        # check SAVE_PATH file exist
+        if not os.path.exists(SAVEPATH):
+            self.reset_data()
+        
+        self.data = self.load_data()
+        self.player_coins = self.data["coins"]
+    
+    def load_data(self):
+        with open(SAVEPATH, 'rb') as savefile:
+            data = pickle.load(savefile)
+            savefile.close()
+            return data
+    
+    def save_data(self, data):
+        with open(SAVEPATH, 'wb') as savefile:
+            pickle.dump(data, savefile)
+            savefile.close()
+    
+    def reset_data(self):
+        data = {
+            "coins": Decimal(0),
+        }
+        self.save_data(data)
 
 if __name__ == "__main__":
     raise Exception('This is not a standalone file, please run main.py instead')
