@@ -114,3 +114,5 @@ WINDOW = pygame.image.load(os.path.join(data_path, "assets/BG/window.png"))
 # }
 
 current_language = config.get("LANGUAGE", "CURRENT_LANGUAGE")
+
+reel_adj = 160
