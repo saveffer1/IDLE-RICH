@@ -48,13 +48,6 @@ class Options:
         config.set('AUDIO', 'MUSIC_MENU', str(obj_index))
         print('[DEBUG] set menu music to ', msc_ingame.path(obj_index))
         Options.save_config()
-    
-    @staticmethod
-    def handle_pygame_event(event):
-        if event.type == QUIT:
-            Options.save_config()
-            pygame.quit()
-            sys.exit()
 
 class SaveData:
     def __init__(self):
