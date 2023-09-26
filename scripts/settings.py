@@ -32,6 +32,7 @@ SOUND_BTNCLICK = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/btn-clicke
 SOUND_COLLECT = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/collected.wav'))
 SOUND_CANTCLICK = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/ui-cantclick.mp3'))
 SOUND_START = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/start.mp3'))
+SOUND_BUY = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/buy.wav'))
 
 # load sound with doubly circular linked list
 msc_ingame = MusicList()
@@ -93,6 +94,12 @@ toggle_hashed = {
     "on":pygame.image.load(os.path.join(data_path,'assets/gui/rg_btn.png')),
     "rect":pygame.image.load(os.path.join(data_path,'assets/gui/tg_rect.png'))
 }
+
+BG_ALPHA = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+BG_ALPHA.fill((0,0,0,128))
+
+BG = pygame.image.load(os.path.join(data_path,'assets/BG/screen.png'))
+
 
 
 # # Slot Machine assets
