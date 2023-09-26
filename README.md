@@ -1,2 +1,2 @@
 # IDLE-RICH
-IdleRich-SlotMachine remake
+IdleRich-SlotMachine rebirth
