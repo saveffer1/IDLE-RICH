@@ -2,6 +2,7 @@ import pygame
 from pygame import mixer
 from settings import *
 from gamestate import *
+from system import Options
 import threading
 
 class Game:
@@ -60,7 +61,13 @@ class Game:
             events = pygame.event.get()
             
             # Handle events and update/render the current state
-            self.states[self.current_state].handle_events(events)
+            for event in events:
+                self.states[self.current_state].handle_events(event)
+                if event.type == QUIT:
+                    Options.save_config()
+                    pygame.quit()
+                    sys.exit()            
+            
             self.states[self.current_state].update()
             self.menu_music.set_volume(config.getint("AUDIO", "MUSIC_VOLUME") / 100)
             self.game_music.set_volume((config.getint("AUDIO", "MUSIC_VOLUME") / 100))

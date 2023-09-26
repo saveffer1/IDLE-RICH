@@ -152,33 +152,31 @@ class MainMenu(GameState):
         # Packed GUI
         self.all_btn = (self.btn_play, self.btn_option, self.btn_credit, self.btn_quit)
         
-    def handle_events(self, events):
-        for event in events:
-            Options.handle_pygame_event(event)
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+    def handle_events(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.btn_quit.clicked():
                     pygame.quit()
                     sys.exit()
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if self.btn_quit.clicked():
-                        pygame.quit()
-                        sys.exit()
-                    if self.btn_play.clicked():
-                        GUI.clicked_sound(SOUND_START, addition_vol=0.3)
-                        self.game.menu_music.stop()
-                        self.game.game_music.play(-1)
-                        self.game.change_state("lobby_menu")
-                    if self.btn_option.clicked():
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.game.menu_music.stop()
-                        self.game.menu_music.play(-1)
-                        self.game.change_state("option_menu")
-                    if self.btn_credit.clicked():
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.game.menu_music.stop()
-                        self.game.menu_music.play(-1)
-                        self.game.change_state("credit_menu")       
+                if self.btn_play.clicked():
+                    GUI.clicked_sound(SOUND_START, addition_vol=0.3)
+                    self.game.menu_music.stop()
+                    self.game.game_music.play(-1)
+                    self.game.change_state("lobby_menu")
+                if self.btn_option.clicked():
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.game.menu_music.stop()
+                    self.game.menu_music.play(-1)
+                    self.game.change_state("option_menu")
+                if self.btn_credit.clicked():
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.game.menu_music.stop()
+                    self.game.menu_music.play(-1)
+                    self.game.change_state("credit_menu")       
     
     def update(self):
         for btn in self.all_btn:
@@ -210,26 +208,32 @@ class PauseMenu(GameState):
         
         self.pause_state = False
         
-        self.all_btn = (self.btn_resume, self.btn_option, self.btn_main_menu)        
+        self.all_btn = (self.btn_resume, self.btn_option, self.btn_main_menu)
+    
+    def show(self):
+        self.pause_state = True
+    
+    def hide(self):
+        self.pause_state = False
+    
+    def is_open(self):
+        return self.pause_state
         
-    def handle_events(self, events):
-        for event in events:
-            Options.handle_pygame_event(event)
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.pause_state = False
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    self.mouse_clicked = True
-                    if self.btn_resume.clicked():
-                        self.game.game_music.play(-1)
-                        self.pause_state = False
-                    if self.btn_option.clicked():
-                        self.game.menu_music.play(-1)
-                        self.game.change_state("option_menu")
-                    if self.btn_main_menu.clicked():
-                        self.pause_state = False
-                        self.game.change_state("main_menu")
+    def handle_events(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.hide()
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.btn_resume.clicked():
+                    self.game.game_music.play(-1)
+                    self.hide()
+                if self.btn_option.clicked():
+                    self.game.menu_music.play(-1)
+                    self.game.change_state("option_menu")
+                if self.btn_main_menu.clicked():
+                    self.hide()
+                    self.game.change_state("main_menu")
 
     def update(self):
         if self.pause_state:
@@ -253,7 +257,7 @@ class OptionMenu(GameState):
         super().__init__(game)
         # Assets
         self.test_music = msc_ingame[0]
-        self.background = pygame.image.load(os.path.join(data_path, "assets", "BG", "screen.png"))
+
         self.option_rect = pygame.image.load(os.path.join(data_path, "assets", "BG", "window.png"))
         
         # GUI
@@ -282,31 +286,29 @@ class OptionMenu(GameState):
         # GAME
         self.stop_sound_event = threading.Event()
         
-    def handle_events(self, events):
-        for event in events:
-            Options.handle_pygame_event(event)
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    self.game.menu_music.stop()
-                    self.game.menu_music.play(-1)
-                    self.game.change_state("main_menu") 
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if self.btn_back.clicked():
-                        self.stop_sound_event.set()
-                        self.test_music.stop()
-                        self.stop_sound_event.clear()
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        if self.game.prev_state == "main_menu":
-                            self.game.menu_music.stop()
-                            self.game.menu_music.play(-1)
-                        self.game.change_state(self.game.prev_state)
+    def handle_events(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.game.menu_music.stop()
+                self.game.menu_music.play(-1)
+                self.game.change_state("main_menu") 
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.btn_back.clicked():
+                    self.stop_sound_event.set()
+                    self.test_music.stop()
+                    self.stop_sound_event.clear()
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    if self.game.prev_state == "main_menu":
+                        self.game.menu_music.stop()
+                        self.game.menu_music.play(-1)
+                    self.game.change_state(self.game.prev_state)
             
-            self.sfx_slider.handle_event(event)
-            self.music_slider.handle_event(event)
-            self.toggle_fullscreen.handle_event(event)
-            self.menumsc_select.handle_event(event)
-            self.gamemsc_select.handle_event(event)
+        self.sfx_slider.handle_events(event)
+        self.music_slider.handle_events(event)
+        self.toggle_fullscreen.handle_events(event)
+        self.menumsc_select.handle_events(event)
+        self.gamemsc_select.handle_events(event)
 
     def update(self):
         for btn in self.all_btn:
@@ -320,7 +322,7 @@ class OptionMenu(GameState):
     
     def render(self):
         self.surface.fill((0, 0, 0))
-        self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
         self.surface.blit(pygame.transform.scale(self.option_rect, (self.surf_width//2, 600)), (320,70))
         
         for component in self.all_lbl + self.all_btn:
@@ -373,7 +375,6 @@ class CreditMenu(GameState):
         super().__init__(game)
         
         # Assets
-        self.background = pygame.image.load(os.path.join(data_path, "assets", "BG", "screen.png"))
         self.credit_music = pygame.mixer.Sound(os.path.join(data_path, "assets", "audio", "music", "credit.mp3"))
         
         self.btn_back = IMGButton(type="close", x=25, y=25)
@@ -384,23 +385,20 @@ class CreditMenu(GameState):
         
         self.credit_text = tl("credit")
     
-    def handle_events(self, events):
-        for event in events:
-            Options.handle_pygame_event(event)
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+    def handle_events(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.credit_music.stop()
+                self.game.menu_music.play(-1)
+                self.deltaY = self.centery + 50
+                self.game.change_state(self.game.prev_state)
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.btn_back.clicked():
                     self.credit_music.stop()
                     self.game.menu_music.play(-1)
                     self.deltaY = self.centery + 50
                     self.game.change_state(self.game.prev_state)
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    self.mouse_clicked = True
-                    if self.btn_back.clicked():
-                        self.credit_music.stop()
-                        self.game.menu_music.play(-1)
-                        self.deltaY = self.centery + 50
-                        self.game.change_state(self.game.prev_state)
             
     def update(self):
         self.btn_back.set_hover()
@@ -411,7 +409,7 @@ class CreditMenu(GameState):
 
     def render(self):
         self.surface.fill((0,0,0))
-        self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
         
         self.btn_back.draw()
         
@@ -443,7 +441,6 @@ class Lobby(GameState):
     def __init__(self, game):
         super().__init__(game)
         
-        self.background = pygame.image.load(os.path.join(data_path, "assets/BG/screen.png"))
         self.play_image = pygame.image.load(os.path.join(data_path, "assets/gui/lobby-play.png"))
         self.navbar = pygame.image.load(os.path.join(data_path, "assets/gui/lobby-nav.png"))
         self.btn_buy = IMGButton(type="buy", x=750, y=5)
@@ -457,44 +454,39 @@ class Lobby(GameState):
         self.buy_panel = Buy_Popup(width=500, height=500, x=400, y=200)
         self.pause_panel = PauseMenu(self.game)
     
-    def handle_events(self, events):
-        for event in events:
-            Options.handle_pygame_event(event)
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
+    def handle_events(self, event):
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                self.game.game_music.stop()
+                self.game.menu_music.play(-1)
+                self.game.change_state("main_menu")
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1 and not self.buy_panel.is_open() and not self.pause_panel.is_open():
+                if self.btn_buy.clicked():
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.game.game_music.stop()
+                    self.buy_panel.show()
+                if self.btn_pause.clicked():
+                    GUI.clicked_sound(SOUND_BTNCLICK)
                     self.game.game_music.stop()
                     self.game.menu_music.play(-1)
-                    self.game.change_state("main_menu")
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1 and not self.buy_panel.open and not self.pause_panel.pause_state:
-                    self.mouse_clicked = True
-                    if self.btn_buy.clicked():
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.game.game_music.stop()
-                        self.buy_panel.open = True
-                    if self.btn_pause.clicked():
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.game.game_music.stop()
-                        self.game.menu_music.play(-1)
-                        self.pause_panel.pause_state = True
-                    if self.btn_playslot.clicked():
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.game.change_state("game_play")
-                else:
-                    self.mouse_clicked = False
+                    self.pause_panel.show()
+                if self.btn_playslot.clicked():
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.game.change_state("game_play")
             
-            if self.buy_panel.open and not self.pause_panel.pause_state:
-                amount = self.buy_panel.handle_event(event)
-                if amount != None:
+        if self.buy_panel.is_open() and not self.pause_panel.is_open():
+            amount = self.buy_panel.handle_events(event)
+            if amount != None:
                     self.add_money(amount)
-            if self.pause_panel.pause_state and not self.buy_panel.open:
-                self.pause_panel.handle_events(events)
+        elif self.pause_panel.is_open() and not self.buy_panel.is_open():
+            self.pause_panel.handle_events(event)
 
     def add_money(self, amount):
         print((type(amount)), amount)
     
     def update(self):
-        if not self.buy_panel.open and not self.pause_panel.pause_state:
+        if not self.buy_panel.is_open() and not self.pause_panel.is_open():
             self.btn_pause.set_hover()
             self.btn_pause.collide_sound(SOUND_UISELECT)
             for btn in self.all_btn:
@@ -503,15 +495,15 @@ class Lobby(GameState):
                 btn.set_hover()
                 btn.collide_sound(SOUND_UISELECT)
         
-        if self.buy_panel.open and not self.pause_panel.pause_state:
+        if self.buy_panel.is_open() and not self.pause_panel.is_open():
             self.buy_panel.update()
             
-        if self.pause_panel.pause_state and not self.buy_panel.open:
+        elif self.pause_panel.is_open() and not self.buy_panel.is_open():
             self.pause_panel.update()
     
     def render(self):
         self.surface.fill("#000000")
-        self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
         self.surface.blit(self.navbar, (0, 0))
         self.surface.blit(self.play_image, (self.surf_width//2 - self.play_image.get_width()//2, self.surf_height//2 - self.play_image.get_height()//2))
         
@@ -519,10 +511,10 @@ class Lobby(GameState):
         for btn in self.all_btn:
             btn.draw()
         
-        if self.buy_panel.open and not self.pause_panel.pause_state:
+        if self.buy_panel.is_open() and not self.pause_panel.is_open():
             self.buy_panel.draw()
         
-        if self.pause_panel.pause_state and not self.buy_panel.open:
+        elif self.pause_panel.is_open() and not self.buy_panel.is_open():
             self.pause_panel.render()
         
         pygame.display.update()
@@ -535,7 +527,6 @@ class GamePlay(GameState):
         self.alpha_background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self.alpha_background.fill((0, 0, 0, 128))
         
-        self.background = pygame.image.load(os.path.join(data_path, "assets/BG/screen.png"))
         self.frame = pygame.image.load(os.path.join(data_path, "assets/BG/back.png"))
         
         self.image_home = pygame.image.load(os.path.join(data_path, "assets/gui/home_btn.png"))
@@ -554,24 +545,22 @@ class GamePlay(GameState):
         self.start_time = pygame.time.get_ticks()
         self.delta_time = 0
         
-    def handle_events(self, events):
-        for event in events:
-            Options.handle_pygame_event(event)
-            if event.type == KEYDOWN:
+    def handle_events(self, event):
+        if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     self.game.change_state("lobby_menu")
-            if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1 and not self.paylines_show:
-                    if self.btn_home.collidepoint(event.pos):
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.game.change_state("lobby_menu")
-                    if self.btn_info.collidepoint(event.pos):
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.paylines_show = True
-                elif event.button == 1 and self.paylines_show:
-                    if self.btn_paylines_close.clicked():
-                        GUI.clicked_sound(SOUND_BTNCLICK)
-                        self.paylines_show = False
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1 and not self.paylines_show:
+                if self.btn_home.collidepoint(event.pos):
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.game.change_state("lobby_menu")
+                if self.btn_info.collidepoint(event.pos):
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.paylines_show = True
+            elif event.button == 1 and self.paylines_show:
+                if self.btn_paylines_close.clicked():
+                    GUI.clicked_sound(SOUND_BTNCLICK)
+                    self.paylines_show = False
     
     def update(self):
         self.btn_paylines_close.set_hover()
@@ -582,7 +571,7 @@ class GamePlay(GameState):
     
     def render(self):
         self.surface.fill("#000000")
-        self.surface.blit(pygame.transform.scale(self.background, (self.surf_width, self.surf_height)), (0, 0))
+        self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
         
         self.slot_machine.update(self.delta_time)
         

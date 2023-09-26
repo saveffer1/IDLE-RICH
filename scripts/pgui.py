@@ -218,7 +218,7 @@ class RangeSlider(GUI):
             self.thumb_position = min(max(pygame.mouse.get_pos()[0], self.x), self.x + self.range_width)
             self.value = int((self.thumb_position - self.x) / self.range_width * (self.max_value - self.min_value) + self.min_value)
 
-    def handle_event(self, event):
+    def handle_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
             if self.thumb_position - self.button_size // 2 <= mouse_x <= self.thumb_position + self.button_size // 2 and self.y - self.button_size // 2 <= mouse_y <= self.y + self.button_size // 2:
@@ -248,7 +248,7 @@ class ToggleButton(GUI):
         if self.is_on:
             self.surface.blit(self.on_img, (self.rect_frame.x + 10, self.rect_frame.y + 10))
     
-    def handle_event(self, event):
+    def handle_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.rect.collidepoint(event.pos):
                 self.is_on = not self.is_on
@@ -289,7 +289,7 @@ class Selector(GUI):
         right_arrow_rect = right_arrow.get_rect(center=self.right_arrow_rect.center)
         self.surface.blit(right_arrow, right_arrow_rect)
     
-    def handle_event(self, event):
+    def handle_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.left_arrow_rect.collidepoint(event.pos):
                 self.current_index = (self.current_index - 1) % len(self.tracks)
@@ -299,8 +299,11 @@ class Selector(GUI):
                 self.callback(self.current_index)
 
 class YesNoPopup(GUI):
-    def __init__(self, width=250, height=50, x=0, y=0) -> None:
+    def __init__(self,text:str, font:str=None, font_size:int=50, width=250, height=50, x=0, y=0) -> None:
         super().__init__(width, height, x, y)
+    
+    
+        
 
 class Buy_Popup(GUI):
     def __init__(self, width=250, height=50, x=0, y=0, val1=500, val2=2000, val3=5000) -> None:
@@ -309,9 +312,6 @@ class Buy_Popup(GUI):
         self.val1 = val1
         self.val2 = val2
         self.val3 = val3
-        
-        self.alpha_background = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        self.alpha_background.fill((0, 0, 0, 128))
         
         self.shop_panel = pygame.image.load(os.path.join(data_path, "assets", "BG", "window.png"))
         self.shop_panel_rect = self.shop_panel.get_rect()
@@ -336,19 +336,28 @@ class Buy_Popup(GUI):
         
         self.open = False
     
-    def handle_event(self, event):
+    def show(self):
+        self.open = True
+    
+    def hide(self):
+        self.open = False
+    
+    def is_open(self):
+        return self.open
+    
+    def handle_events(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.btn_close.clicked():
                 GUI.clicked_sound(SOUND_BTNCLICK)
                 self.open = False
             elif self.buy_btn_1.clicked():
-                GUI.clicked_sound(SOUND_COLLECT)
+                GUI.clicked_sound(SOUND_BUY)
                 return self.val1
             elif self.buy_btn_2.clicked():
-                GUI.clicked_sound(SOUND_COLLECT)
+                GUI.clicked_sound(SOUND_BUY)
                 return self.val2
             elif self.buy_btn_3.clicked():
-                GUI.clicked_sound(SOUND_COLLECT)
+                GUI.clicked_sound(SOUND_BUY)
                 return self.val3
             else:
                 return None
@@ -361,7 +370,7 @@ class Buy_Popup(GUI):
     
     def draw(self):
         if self.open:
-            self.surface.blit(self.alpha_background, (0, 0))
+            self.surface.blit(BG_ALPHA, (0, 0))
             self.surface.blit(self.shop_panel, self.shop_panel_rect)
             
             self.btn_close.draw()
