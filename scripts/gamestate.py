@@ -8,7 +8,7 @@ import time
 from settings import *
 from pgui import *
 from system import *
-from slot import *
+from slotmachine import *
 from translator import tl, lang, translator
 
 class GameState:
