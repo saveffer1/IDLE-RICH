@@ -1,10 +1,12 @@
-import pygame
+import pygame, ctypes
 from pygame import mixer
 from settings import *
 from gamestate import *
 from system import Options
 from translator import tl
 import threading
+
+ctypes.windll.user32.SetProcessDPIAware()
 
 class Game:
     def __init__(self):
