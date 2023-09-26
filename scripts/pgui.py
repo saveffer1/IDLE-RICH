@@ -3,6 +3,7 @@ from pygame.locals import *
 from pygame import mixer
 from settings import *
 from datakit import MusicList
+from translator import tl
 
 class GUI:
     def __init__(self, width=250, height=50, x=0, y=0) -> None:
@@ -272,8 +273,8 @@ class Selector(GUI):
         
         self.text_color = "#FFFFFF"
         
-        self.left_arrow_rect = pygame.Rect(x - 50, y, 50, height)
-        self.right_arrow_rect = pygame.Rect(x + width, y, 50, height)
+        self.left_arrow_rect = pygame.Rect(x - 50, y+10, 50, height)
+        self.right_arrow_rect = pygame.Rect(x + width, y+10, 50, height)
     
     def draw(self):
         current_track_name = self.tracks.name(self.current_index)
@@ -299,12 +300,72 @@ class Selector(GUI):
                 self.callback(self.current_index)
 
 class YesNoPopup(GUI):
-    def __init__(self,text:str, font:str=None, font_size:int=50, width=250, height=50, x=0, y=0) -> None:
+    def __init__(self,text:str, font:str=None, font_size:int=50, width=250, height=50, x=0, y=0, callback:callable=False) -> None:
         super().__init__(width, height, x, y)
-    
-    
         
+        self.panel = WINDOW
+        self.panel_rect = self.panel.get_rect()
+        self.panel_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2) 
+        
+        self.btn_close = IMGButton("close", x=self.panel_rect.x + self.panel_rect.width - 50, y=self.panel_rect.y - 20)
+        
+        self.btn_yes = TextButton(tl('btn_y'), font_size=40, x=self.panel_rect.x + 50, y=self.panel_rect.y + 450, type="buy_button")
+        self.btn_yes.resize(200, 50)
+        
+        self.btn_no = TextButton(tl('btn_n'), font_size=40, x=self.panel_rect.x + 700, y=self.panel_rect.y + 450, type="button")
+        self.btn_no.resize(200, 50)
+        
+        self.text = text
+        if font is None:
+            self.font = pygame.font.Font(FONT, font_size)
+        else:
+            self.font = pygame.font.Font(font, font_size)
+        self.text_color = "#FFFFFF"
+        self.text_surf = self.font.render(text, True, self.text_color)
+        self.text_rect = self.text_surf.get_rect(center=self.panel_rect.center)
+        
+        self.open = False
+    
+    def show(self):
+        self.open = True
+        return self.open
+    
+    def hide(self):
+        self.open = False
+    
+    def is_open(self):
+        return self.open
 
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.btn_close.clicked():
+                GUI.clicked_sound(SOUND_BTNCLICK)
+                self.hide()
+            elif self.btn_yes.clicked():
+                GUI.clicked_sound(SOUND_UISELECT)
+                return True
+            elif self.btn_no.clicked():
+                GUI.clicked_sound(SOUND_BTNCLICK)
+                return False
+            else:
+                return None
+    
+    def update(self):
+        self.btn_close.set_hover()
+        self.btn_yes.set_hover()
+        self.btn_no.set_hover()
+    
+    def draw(self):
+        if self.is_open():
+            self.surface.blit(BG_ALPHA, (0, 0))
+            self.surface.blit(self.panel, self.panel_rect)
+            
+            self.btn_close.draw()
+            self.btn_yes.draw()
+            self.btn_no.draw()
+            
+            self.surface.blit(self.text_surf, self.text_rect)
+    
 class Buy_Popup(GUI):
     def __init__(self, width=250, height=50, x=0, y=0, val1=500, val2=2000, val3=5000) -> None:
         super().__init__(width, height, x, y)
@@ -313,7 +374,7 @@ class Buy_Popup(GUI):
         self.val2 = val2
         self.val3 = val3
         
-        self.shop_panel = pygame.image.load(os.path.join(data_path, "assets", "BG", "window.png"))
+        self.shop_panel = WINDOW
         self.shop_panel_rect = self.shop_panel.get_rect()
         self.shop_panel_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
@@ -323,15 +384,15 @@ class Buy_Popup(GUI):
         self.img_coin_2 = pygame.image.load(os.path.join(data_path, "assets/shop/Shop_Coin_2.png"))
         self.img_coin_3 = pygame.image.load(os.path.join(data_path, "assets/shop/Shop_Coin_3.png"))
         
-        self.lbl_coin_1 = Label(f"{val1} coins", font_size=50, x=self.shop_panel_rect.x + 50, y=self.shop_panel_rect.y + 300)
-        self.lbl_coin_2 = Label(f"{val2} coins", font_size=50, x=self.shop_panel_rect.x + 350, y=self.shop_panel_rect.y + 300)
-        self.lbl_coin_3 = Label(f"{val3} coins", font_size=50, x=self.shop_panel_rect.x + 650, y=self.shop_panel_rect.y + 300)
+        self.lbl_coin_1 = Label(f"{val1} {tl('lbl_coins')}", font_size=50, x=self.shop_panel_rect.x + 50, y=self.shop_panel_rect.y + 300)
+        self.lbl_coin_2 = Label(f"{val2} {tl('lbl_coins')}", font_size=50, x=self.shop_panel_rect.x + 350, y=self.shop_panel_rect.y + 300)
+        self.lbl_coin_3 = Label(f"{val3} {tl('lbl_coins')}", font_size=50, x=self.shop_panel_rect.x + 650, y=self.shop_panel_rect.y + 300)
         
-        self.buy_btn_1 = TextButton("Buy", font_size=40, x=self.shop_panel_rect.x + 50, y=self.shop_panel_rect.y + 450, type="buy_button")
+        self.buy_btn_1 = TextButton(tl("btn_buy"), font_size=40, x=self.shop_panel_rect.x + 50, y=self.shop_panel_rect.y + 450, type="buy_button")
         self.buy_btn_1.resize(200, 50)
-        self.buy_btn_2 = TextButton("Buy", font_size=40, x=self.shop_panel_rect.x + 350, y=self.shop_panel_rect.y + 450, type="buy_button")
+        self.buy_btn_2 = TextButton(tl("btn_buy"), font_size=40, x=self.shop_panel_rect.x + 350, y=self.shop_panel_rect.y + 450, type="buy_button")
         self.buy_btn_2.resize(200, 50)
-        self.buy_btn_3 = TextButton("Buy", font_size=40, x=self.shop_panel_rect.x + 650, y=self.shop_panel_rect.y + 450, type="buy_button")
+        self.buy_btn_3 = TextButton(tl("btn_buy"), font_size=40, x=self.shop_panel_rect.x + 650, y=self.shop_panel_rect.y + 450, type="buy_button")
         self.buy_btn_3.resize(200, 50)
         
         self.open = False
@@ -349,7 +410,7 @@ class Buy_Popup(GUI):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.btn_close.clicked():
                 GUI.clicked_sound(SOUND_BTNCLICK)
-                self.open = False
+                self.hide()
             elif self.buy_btn_1.clicked():
                 GUI.clicked_sound(SOUND_BUY)
                 return self.val1
@@ -369,7 +430,7 @@ class Buy_Popup(GUI):
         self.buy_btn_3.set_hover()
     
     def draw(self):
-        if self.open:
+        if self.is_open():
             self.surface.blit(BG_ALPHA, (0, 0))
             self.surface.blit(self.shop_panel, self.shop_panel_rect)
             

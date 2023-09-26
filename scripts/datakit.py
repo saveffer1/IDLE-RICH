@@ -169,6 +169,7 @@ class DCList: # notation as Doubly Circular Linked List
         elif index == 0:
             return self.head.data
         else:
+            current = self.head
             for _ in range(index):
                 current = current.next
             return current.data
@@ -230,6 +231,10 @@ class MusicList(DCList):
     
     def name(self, index: int):
         return self.path(index).split('/')[-1].split('.')[0]
+
+class LanguageList(DCList):
+    def name(self, index:int):
+        return self.__getitem__(index)
 
 if __name__ == "__main__":
     raise RuntimeError("This module is not meant to run on its own!")

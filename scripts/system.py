@@ -46,7 +46,7 @@ class Options:
     @staticmethod
     def save_menu_music(obj_index: int, obj: pygame.mixer.Sound):
         config.set('AUDIO', 'MUSIC_MENU', str(obj_index))
-        print('[DEBUG] set menu music to ', msc_ingame.path(obj_index))
+        print('[DEBUG] set menu music to ', msc_menu.path(obj_index))
         Options.save_config()
 
 class SaveData:
@@ -55,13 +55,14 @@ class SaveData:
         if not os.path.exists(SAVEPATH):
             self.reset_data()
         
-        self.data = self.load_data()
+        self.load_data()
         self.player_coins = self.data["coins"]
     
     def load_data(self):
         with open(SAVEPATH, 'rb') as savefile:
             data = pickle.load(savefile)
             savefile.close()
+            self.data = data
             return data
     
     def save_data(self, data):

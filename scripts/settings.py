@@ -3,7 +3,6 @@ from configparser import ConfigParser
 import pygame
 import os
 from datakit import *
-from translator import Translator
 import json
 
 script_directory = os.path.dirname(__file__)
@@ -22,8 +21,8 @@ SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
 
 # load save file
-SAVEPATH = os.path.join(data_path,data_path,'config/savefile.sav')
-# SAVEPATH = os.path.join(data_path,data_path,'config/save.json')
+SAVEPATH = os.path.join(data_path,'config/savefile.sav')
+# SAVEPATH = os.path.join(data_path'config/save.json')
 
 # load sfx file
 mixer.init()
@@ -100,7 +99,7 @@ BG_ALPHA.fill((0,0,0,128))
 
 BG = pygame.image.load(os.path.join(data_path,'assets/BG/screen.png'))
 
-
+WINDOW = pygame.image.load(os.path.join(data_path, "assets/BG/window.png"))
 
 # # Slot Machine assets
 # slot_img = {
@@ -115,10 +114,3 @@ BG = pygame.image.load(os.path.join(data_path,'assets/BG/screen.png'))
 # }
 
 current_language = config.get("LANGUAGE", "CURRENT_LANGUAGE")
-translator = Translator(current_lang=current_language)
-translator.load_translations(os.path.join(data_path,"config", "translations.json"))
-
-tl = translator.translate
-
-if __name__ == "__main__":
-    raise RuntimeError("This module is not meant to run on its own!")

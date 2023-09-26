@@ -9,6 +9,7 @@ from settings import *
 from pgui import *
 from system import *
 from slot import *
+from translator import tl, lang, translator
 
 class GameState:
     """
@@ -258,7 +259,7 @@ class OptionMenu(GameState):
         # Assets
         self.test_music = msc_ingame[0]
 
-        self.option_rect = pygame.image.load(os.path.join(data_path, "assets", "BG", "window.png"))
+        self.option_rect = WINDOW
         
         # GUI
         self.option_label = Label(tl("lbl_options"), font_size=60, x=550, y=60)
@@ -274,11 +275,17 @@ class OptionMenu(GameState):
         self.sfx_slider = RangeSlider(start_value=config.getint("AUDIO", "SFX_VOLUME"), x=600, y=280, range_width=300, callback=Options.set_sfx_volume)
         self.sfx_slider.play_sound_after_drag = True
         
-        self.menumsc_select = Selector(msc_menu, start_index=config.getint("AUDIO", "MUSIC_MENU"), x=650, y=320, callback=self.setmusic_menu)
-        self.gamemsc_select = Selector(msc_ingame, start_index=config.getint("AUDIO", "MUSIC_INGAME"), x=650, y=380, callback=self.setmusic_ingame)
+        self.menumsc_select = Selector(msc_menu, start_index=config.getint("AUDIO", "MUSIC_MENU"), x=650, y=320, callback=self.__setmusic_menu)
+        self.gamemsc_select = Selector(msc_ingame, start_index=config.getint("AUDIO", "MUSIC_INGAME"), x=650, y=380, callback=self.__setmusic_ingame)
+        self.lang_select = Selector(lang, start_index=lang.find(config.get("LANGUAGE", "CURRENT_LANGUAGE")), x=1000, y=600, callback=lambda x : translator.set_language(lang[x]))
+        self.lang_select.left_arrow_rect = pygame.Rect(1060, 610, 50, self.lang_select.rect.h)
+        self.lang_select.right_arrow_rect = pygame.Rect(1120, 610, 50, self.lang_select.rect.h)
+        
         
         self.btn_clrsav = IMGButton(type="delsave", x=725, y=520)
         self.btn_back = IMGButton(type="close", x=920, y=50)
+        
+        self.panel_clrsav = YesNoPopup(tl("clearsav_question"), width=500, height=500, x=400, y=200)
         
         self.all_lbl = (self.option_label, self.music_label, self.sfx_label, self.menumsc_label, self.gamemsc_label, self.fullscr_label, self.clrsav_label)
         self.all_btn = (self.btn_back, self.btn_clrsav)
@@ -293,7 +300,7 @@ class OptionMenu(GameState):
                 self.game.menu_music.play(-1)
                 self.game.change_state("main_menu") 
         if event.type == MOUSEBUTTONDOWN:
-            if event.button == 1:
+            if event.button == 1 and not self.panel_clrsav.is_open():
                 if self.btn_back.clicked():
                     self.stop_sound_event.set()
                     self.test_music.stop()
@@ -303,22 +310,37 @@ class OptionMenu(GameState):
                         self.game.menu_music.stop()
                         self.game.menu_music.play(-1)
                     self.game.change_state(self.game.prev_state)
-            
+                if self.btn_clrsav.clicked():
+                    self.panel_clrsav.show()
+
         self.sfx_slider.handle_events(event)
         self.music_slider.handle_events(event)
         self.toggle_fullscreen.handle_events(event)
         self.menumsc_select.handle_events(event)
         self.gamemsc_select.handle_events(event)
+        self.lang_select.handle_events(event)
+        confirm = self.panel_clrsav.handle_events(event)
+        if self.panel_clrsav.is_open() and confirm is not None:
+            if not confirm:
+                self.panel_clrsav.hide()
+            else:
+                GUI.clicked_sound(SOUND_START)
+                self.game.save_game.reset_data()
+                self.game.save_game.load_data()
+                self.panel_clrsav.hide()
 
     def update(self):
-        for btn in self.all_btn:
-            if isinstance(btn, TextButton):
-                btn.set_elevate()
-            btn.set_hover()
-            btn.collide_sound(SOUND_UISELECT)
+        if self.panel_clrsav.is_open():
+            self.panel_clrsav.update()
+        else:
+            for btn in self.all_btn:
+                if isinstance(btn, TextButton):
+                    btn.set_elevate()
+                btn.set_hover()
+                btn.collide_sound(SOUND_UISELECT)
         
-        self.sfx_slider.update()
-        self.music_slider.update()
+            self.sfx_slider.update()
+            self.music_slider.update()
     
     def render(self):
         self.surface.fill((0, 0, 0))
@@ -333,11 +355,15 @@ class OptionMenu(GameState):
         self.toggle_fullscreen.draw()
         self.menumsc_select.draw()
         self.gamemsc_select.draw()
+        self.lang_select.draw()
+        
+        if self.panel_clrsav.is_open():
+            self.panel_clrsav.draw()
         
         pygame.display.update()
         self.clock.tick(self.fps)
 
-    def play_sound_thread(self, musicobj: int, duration_seconds: int):
+    def __play_sound_thread(self, musicobj: int, duration_seconds: int):
         if self.stop_sound_event.is_set():
             self.test_music.stop()
             self.stop_sound_event.clear()
@@ -349,24 +375,24 @@ class OptionMenu(GameState):
         self.test_music.stop()
         self.game.menu_music.play(-1)
     
-    def setmusic_menu(self, obj_index: int):
+    def __setmusic_menu(self, obj_index: int):
         self.stop_sound_event.set()
         self.game.menu_music.stop()
         self.test_music.stop()
 
         duration_seconds = 5
-        sound_thread = threading.Thread(target=self.play_sound_thread, args=(msc_menu[obj_index], duration_seconds))
+        sound_thread = threading.Thread(target=self.__play_sound_thread, args=(msc_menu[obj_index], duration_seconds))
         sound_thread.start()
         Options.save_menu_music(obj_index, msc_menu)
         self.game.menu_music = msc_menu[config.getint('AUDIO', 'MUSIC_MENU')]
     
-    def setmusic_ingame(self, obj_index: int):
+    def __setmusic_ingame(self, obj_index: int):
         self.stop_sound_event.set()
         self.game.menu_music.stop()
         self.test_music.stop()
 
         duration_seconds = 5
-        sound_thread = threading.Thread(target=self.play_sound_thread, args=(msc_ingame[obj_index], duration_seconds))
+        sound_thread = threading.Thread(target=self.__play_sound_thread, args=(msc_ingame[obj_index], duration_seconds))
         sound_thread.start()
         Options.save_ingame_music(obj_index, msc_ingame)
 

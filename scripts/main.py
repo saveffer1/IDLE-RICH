@@ -3,6 +3,7 @@ from pygame import mixer
 from settings import *
 from gamestate import *
 from system import Options
+from translator import tl
 import threading
 
 class Game:
@@ -29,9 +30,9 @@ class Game:
         self.loading_complete = threading.Event()
         self.loading_complete.set()
         
-        transaction_th = threading.Thread(target=self.__first_load)
-        transaction_th.daemon = True
-        transaction_th.start()
+        state_th = threading.Thread(target=self.__first_load)
+        state_th.daemon = True
+        state_th.start()
         # transaction_th.join()
         
         self.states["loading"].load()
@@ -48,6 +49,9 @@ class Game:
             "lobby_menu": Lobby(self),
             "game_play": GamePlay(self)
         }
+        self.save_game = SaveData()
+        self.save_data = self.save_game.data
+        self.balance = self.save_game.player_coins
         self.loading_complete.clear()
         self.change_state("main_menu")
         
