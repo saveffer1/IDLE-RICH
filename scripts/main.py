@@ -6,7 +6,7 @@ from system import Options
 from translator import tl
 import threading
 
-ctypes.windll.user32.SetProcessDPIAware()
+# ctypes.windll.user32.SetProcessDPIAware()
 
 class Game:
     def __init__(self):
