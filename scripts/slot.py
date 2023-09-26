@@ -3,175 +3,6 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 import random
 from settings import data_path
-
-class Reel:
-    def __init__(self, pos, reels):
-        self.symbol_list = pygame.sprite.Group()
-        self.reels = reels
-        random.shuffle(self.reels)
-        self.reels = self.reels[:9] # Only matters when there are more than 5 symbols
-
-        self.reel_is_spinning = False
-
-        # Sounds
-        # self.stop_sound = pygame.mixer.Sound('audio/stop.mp3')
-        # self.stop_sound.set_volume(0.5)
-
-        for idx, item in enumerate(self.reels):
-            self.symbol_list.add(SlotSymbol(item.symbol, item.image, pos, idx))
-            pos = list(pos)
-            pos[1] += (144 + 10)
-            pos = tuple(pos)
-
-    def animate(self, delta_time):
-        if self.reel_is_spinning:
-            self.delay_time -= (delta_time * 1000)
-            self.spin_time -= (delta_time * 1000)
-            reel_is_stopping = False
-
-            if self.spin_time < 0:
-                reel_is_stopping = True
-
-            # Stagger reel spin start animation
-            if self.delay_time <= 0:
-
-                # Iterate through all 5 symbols in reel; truncate; add new random symbol on top of stack
-                for i, symbol in enumerate(self.symbol_list):
-                    symbol.rect.bottom += 100
-
-                    # Correct spacing is dependent on the above addition eventually hitting 1200
-                    if symbol.rect.top == 1200:
-                        if reel_is_stopping:
-                            self.reel_is_spinning = False
-                            # self.stop_sound.play()
-
-                        symbol_idx = symbol.idx
-                        symbol.kill()
-                        # Spawn random symbol in place of the above
-                        randsym = random.choice(self.reels)
-                        self.symbol_list.add(SlotSymbol(randsym.symbol, randsym.image, ((symbol.x_val), -300), symbol_idx))
-
-    def start_spin(self, delay_time):
-        self.delay_time = delay_time
-        self.spin_time = 1000 + delay_time
-        self.reel_is_spinning = True
-
-    def reel_spin_result(self):
-        # Get and return text representation of symbols in a given reel
-        spin_symbols = []
-        for i in [0, 1, 2]:
-            spin_symbols.append(self.symbol_list.sprites()[i].symbol)
-        return spin_symbols
-
-class SlotSymbol(pygame.sprite.Sprite):
-    def __init__(self, symbol, image, pos, idx):
-        super().__init__()
-
-        self.symbol = symbol
-        self.pos = pos
-        self.idx = idx
-        self.image = image.convert_alpha()
-        self.rect = self.image.get_rect(topleft = pos)
-        self.x_val = self.rect.left
-
-        # Used for win animations
-        self.size_x = 300
-        self.size_y = 300
-        self.alpha = 255
-        self.fade_out = False
-        self.fade_in = False
-
-    def update(self):
-        # Slightly increases size of winning symbols
-        if self.fade_in:
-            if self.size_x < 320:
-                self.size_x += 1
-                self.size_y += 1
-                self.image = pygame.transform.scale(self.image, (self.size_x, self.size_y))
-        
-        # Fades out non-winning symbols
-        elif not self.fade_in and self.fade_out:
-            if self.alpha > 115:
-                self.alpha -= 7
-                self.image.set_alpha(self.alpha)
-
-class SlotMachine:
-    def __init__(self, min_bet):
-        self.surface = pygame.display.get_surface()
-        self.system = SlotSystem(min_bet)
-        
-        self.reel_index = 0
-        self.reel_list = {}
-        self.can_toggle = True
-        self.spinning = False
-        self.can_animate = False
-        self.win_animation_ongoing = False
-        
-        self.spin_result = {0: None, 1: None, 2: None, 3: None, 4: None}
-        
-        self.spawn_reels()
-    
-    def cooldowns(self):
-        # Only lets player spin if all reels are NOT spinning
-        for reel in self.reel_list:
-            if self.reel_list[reel].reel_is_spinning:
-                self.can_toggle = False
-                self.spinning = True
-
-        if not self.can_toggle and [self.reel_list[reel].reel_is_spinning for reel in self.reel_list].count(False) == 5:
-            self.can_toggle = True
-            result = self.get_result()
-            print(result)
-    
-    def input(self):
-        keys = pygame.key.get_pressed()
-
-        # Checks for space key, ability to toggle spin, and balance to cover bet size
-        if keys[pygame.K_SPACE] and self.can_toggle:
-            self.toggle_spinning()
-            self.spin_time = pygame.time.get_ticks()
-            
-    def draw_reels(self, delta_time):
-        for reel in self.reel_list:
-            self.reel_list[reel].animate(delta_time)
-
-    def spawn_reels(self):
-        if not self.reel_list:
-            x_topleft, y_topleft = 250, -300
-        while self.reel_index < 5:
-            if self.reel_index > 0:
-                x_topleft, y_topleft = x_topleft + (144 + 10), y_topleft
-            
-            self.reel_list[self.reel_index] = Reel((x_topleft, y_topleft), self.system.reels) # Need to create reel class
-            self.reel_index += 1
-
-    def toggle_spinning(self):
-        if self.can_toggle:
-            self.spin_time = pygame.time.get_ticks()
-            self.spinning = not self.spinning
-            self.can_toggle = False
-            
-            for reel in self.reel_list:
-                self.reel_list[reel].start_spin(int(reel) * 200)
-                # self.spin_sound.play()
-                self.win_animation_ongoing = False
-    
-    def get_result(self):
-        for reel in self.reel_list:
-            self.spin_result[reel] = self.reel_list[reel].reel_spin_result()
-        return self.spin_result
-
-    # You need to provide sounds and load them in the Machine init function for this to work!
-    def play_win_sound(self):
-        pass
-
-    def update(self, delta_time):
-        self.cooldowns()
-        self.input()
-        self.draw_reels(delta_time)
-        for reel in self.reel_list:
-            self.reel_list[reel].symbol_list.draw(self.surface)
-            self.reel_list[reel].symbol_list.update()
         
 class SlotItem:
     def __init__(self, id, symbol: str, image: pygame.Surface, probability, skill: str="price", payout: dict={3:25, 4:50, 5:200}):
@@ -212,6 +43,9 @@ class SlotSystem:
             [(2, 0), (1, 1), (0, 2), (1, 3), (2, 4)],
             [(0, 0), (1, 1), (2, 2), (1, 3), (0, 4)]
         ]
+        
+        self.win_result = []
+        
     def change_bet(self, min_bet):
         self.min_bet = min_bet
         self.max_bet = 15 * min_bet
@@ -316,11 +150,24 @@ class SlotSystem:
                 
         print(horizontal_line)
         
-    def spin(self, bet=None):
+    def spin(self, randreels=None, bet=None):
+        if bet is None:
+            bet = self.min_bet
+            
         if bet < self.min_bet or bet > self.max_bet:
             raise Exception(f"Invalid bet amount. Bet must be between {self.min_bet} and {self.max_bet}")
         
-        randreels = self.__create_random_reels()
+        if not randreels:
+            randreels = self.__create_random_reels()
+        else:
+            reel = [[], [], []]
+            for i in range(5):
+                reel[0].append(self.reels[randreels[0][i]])
+                reel[1].append(self.reels[randreels[1][i]])
+                reel[2].append(self.reels[randreels[2][i]])
+            
+            randreels = reel
+        
         self.print_slot_symbol(randreels, id_format=False)
         
         wins = self.__get_paylines(randreels, bet)
@@ -329,21 +176,10 @@ class SlotSystem:
         print("Prize: ", wins[1])
         print(f"Special: bonus-level({wins[2]}) freespin({wins[2]})")
         
-        
-        reel0 = [randreels[0][0], randreels[1][0], randreels[2][0]]
-        reel1 = [randreels[0][1], randreels[1][1], randreels[2][1]]
-        reel2 = [randreels[0][2], randreels[1][2], randreels[2][2]]
-        reel3 = [randreels[0][3], randreels[1][3], randreels[2][3]]
-        reel4 = [randreels[0][4], randreels[1][4], randreels[2][4]]
-        
-        reel = [reel0, reel, reel2, reel3, reel4]
-                
-        return reel, wins
+        return wins
+    
 
 if __name__ == "__main__":
-    import time
-    start = time.time()
-    slot = SlotSystem(100)
-    slot.spin(100)
-    end = time.time()
-    print("Time elapsed: ", end - start)
+    x =SlotSystem(100)
+    x.spin()
+
