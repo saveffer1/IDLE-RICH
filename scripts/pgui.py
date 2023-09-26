@@ -11,7 +11,7 @@ class GUI:
         self.rect = pygame.Rect(x, y, width, height)
         self.x = x
         self.y = y
-        
+            
     def draw(self):
         pass
     
@@ -52,6 +52,9 @@ class Label(GUI):
             self.surface.blit(self.text_surf, textrect)
         else:
             self.surface.blit(textobj, textrect)
+    
+    def update(self, text):
+        self.text = text
 
 class IMGButton(GUI):
     def __init__(self, type:str="close", x=0, y=0) -> None:
@@ -150,6 +153,11 @@ class TextButton(IMGButton):
         self.rect = self.rect = pygame.Rect(self.x, self.y, w, h)
         self.top_rect = self.rect.copy()
         self.bottom_rect = self.rect.copy()
+    
+    def update(self, text):
+        self.text = text
+        self.text_surf = self.font.render(text, True, self.text_color)
+        self.text_rect = self.text_surf.get_rect(center=self.rect.center)
 
 class RangeSlider(GUI):
     def __init__(self, min_value: int=0, max_value: int=100,
@@ -350,10 +358,14 @@ class YesNoPopup(GUI):
             else:
                 return None
     
-    def update(self):
+    def update(self, text=None):
         self.btn_close.set_hover()
         self.btn_yes.set_hover()
         self.btn_no.set_hover()
+        if text:
+            self.text = text
+            self.btn_yes.update(tl("btn_y"))
+            self.btn_no.update(tl("btn_n"))
     
     def draw(self):
         if self.is_open():
@@ -428,6 +440,13 @@ class Buy_Popup(GUI):
         self.buy_btn_1.set_hover()
         self.buy_btn_2.set_hover()
         self.buy_btn_3.set_hover()
+        self.buy_btn_1.text = tl("btn_buy")
+        self.buy_btn_2.text = tl("btn_buy")
+        self.buy_btn_3.text = tl("btn_buy")
+            
+        self.lbl_coin_1.text = f"{self.val1} {tl('lbl_coins')}"
+        self.lbl_coin_2.text = f"{self.val2} {tl('lbl_coins')}"
+        self.lbl_coin_3.text = f"{self.val3} {tl('lbl_coins')}"
     
     def draw(self):
         if self.is_open():

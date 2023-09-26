@@ -185,6 +185,10 @@ class MainMenu(GameState):
                 btn.set_elevate()
             btn.set_hover()
             btn.collide_sound(SOUND_UISELECT)
+        self.btn_play.update(tl("btn_play"))
+        self.btn_option.update(tl("btn_option"))
+        self.btn_credit.update(tl("btn_credit"))
+        self.btn_quit.update(tl("btn_quit"))
 
     def render(self):
         self.surface.fill((0,0,0))
@@ -245,6 +249,10 @@ class PauseMenu(GameState):
                     btn.set_elevate()
                 btn.set_hover()
                 btn.collide_sound(SOUND_UISELECT)
+            
+            self.btn_resume.update(tl("btn_resume"))
+            self.btn_option.update(tl("btn_option"))
+            self.btn_main_menu.update(tl("btn_main_menu"))
 
     def render(self):
         if self.pause_state:
@@ -341,6 +349,15 @@ class OptionMenu(GameState):
         
             self.sfx_slider.update()
             self.music_slider.update()
+            
+            self.option_label.update(tl("lbl_options"))
+            self.music_label.update(tl("lbl_music"))
+            self.sfx_label.update(tl("lbl_sfx"))
+            self.menumsc_label.update(tl("lbl_menumsc"))
+            self.gamemsc_label.update(tl("lbl_gamemsc"))
+            self.fullscr_label.update(tl("lbl_fullscr"))
+            self.clrsav_label.update(tl("lbl_clearsav"))
+            self.panel_clrsav.update(tl("clearsav_question"))
     
     def render(self):
         self.surface.fill((0, 0, 0))
@@ -427,6 +444,7 @@ class CreditMenu(GameState):
                     self.game.change_state(self.game.prev_state)
             
     def update(self):
+        self.credit_text = tl("credit")
         self.btn_back.set_hover()
         
         self.credit_music.set_volume((config.getint('AUDIO', 'MUSIC_VOLUME') / 100))
@@ -526,6 +544,8 @@ class Lobby(GameState):
             
         elif self.pause_panel.is_open() and not self.buy_panel.is_open():
             self.pause_panel.update()
+        
+        self.btn_playslot.update(tl("btn_playslot"))
     
     def render(self):
         self.surface.fill("#000000")
