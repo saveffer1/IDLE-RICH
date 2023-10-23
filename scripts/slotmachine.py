@@ -93,8 +93,9 @@ class SlotMachine:
         self.player = Player("Player")
         self.player_bet = 0
         self.player_balance = self.player.balance
+        self.player_free_spin = self.player.auto_spin
         self.min_bet = minbet
-        self.max_bet = minbet * 10
+        self.max_bet = minbet ** 2
         
         self.surface = pygame.display.get_surface()
         self.can_toggle = True
@@ -164,9 +165,9 @@ class SlotMachine:
                     win_amount += self.payout(mapped_table_reel[i])
                     print(mapped_table_reel[i], self.payout(mapped_table_reel[i]), win_amount)
 
-        win_amount = win_amount * self.player_bet
+        win_amount = win_amount * (self.player_bet * 0.1)
         
-        return win_amount
+        return int(win_amount)
     
     def get_result(self):
         reels = [self.reel_list[reel].reel_spin_result() for reel in self.reel_list]
@@ -200,11 +201,13 @@ class SlotMachine:
                 print(f'| {reels[0][i].id} | {reels[1][i].id} | {reels[2][i].id} | {reels[3][i].id} | {reels[4][i].id} |')
         print(horizontal_line)
     
-    def spin(self, bet):
+    def spin(self, bet, pull_lever=False):
         keys = pygame.key.get_pressed()
 
         # Checks for space key, ability to toggle spin, and balance to cover bet size
-        if keys[pygame.K_SPACE] and self.can_toggle:
+        # if keys[pygame.K_SPACE] and self.can_toggle:
+        if self.can_toggle and pull_lever:
+            
             self.spin_time = pygame.time.get_ticks()
             self.spinning = not self.spinning
             self.can_toggle = False
@@ -222,9 +225,9 @@ class SlotMachine:
         for reel in self.reel_list:
             self.reel_list[reel].animate(delta_time)
             
-    def update(self, delta_time):
+    def update(self, delta_time, bet, pull_lever=False):
         self.cooldown()
-        self.spin(100)
+        self.spin(bet, pull_lever)
         self.draw_reels(delta_time)
         for reel in self.reel_list:
             self.reel_list[reel].symbol_list.draw(self.surface)
@@ -232,8 +235,16 @@ class SlotMachine:
     def play(self, bet_amount):      
         if bet_amount < self.min_bet or bet_amount > self.max_bet:
             raise Exception(f"Invalid bet amount. Bet must be between {self.min_bet} and {self.max_bet}")
+        if self.player_balance - bet_amount < 0:
+            print("Not enough balance")
+            return
 
         self.player_bet = bet_amount
+        
+        if self.player_free_spin - (self.player_bet * 0.01) >= 0:
+            self.player_free_spin -= int((self.player_bet * 0.01))
+        else:
+            self.player_balance -= bet_amount
         
         result, bonus_count, free_spin_count = self.get_result()
         payout = self.check_wins(result)
@@ -241,12 +252,13 @@ class SlotMachine:
         self.print_reels(result)
         print(f"Special: bonus-level({bonus_count}) freespin({free_spin_count})")
         
+        self.player_free_spin += free_spin_count
+        
         if payout > 0:
             print(f"You won {payout} coins!")
-            self.player_balance += payout
+            self.player_balance += (payout + self.player_bet)
         else:
             print(f"No win this time.")
-            self.player_balance -= bet_amount
 
         print(f"Balance: {self.player_balance} coins\n")
 
