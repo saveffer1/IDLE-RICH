@@ -16,11 +16,11 @@ class SlotItem:
 items = [
     SlotItem(0, "🍌", pygame.image.load(os.path.join(data_path, 'assets/slot/item/banana.png')), 20, "price", 4),
     SlotItem(1, "🍇", pygame.image.load(os.path.join(data_path, 'assets/slot/item/grape.png')), 20, "price", 4),
-    SlotItem(2, "🍒", pygame.image.load(os.path.join(data_path, 'assets/slot/item/cherry.png')), 20, "price", 2),
-    SlotItem(3, "🍋", pygame.image.load(os.path.join(data_path, 'assets/slot/item/lemon.png')), 20, "price", 2),
+    SlotItem(2, "🍒", pygame.image.load(os.path.join(data_path, 'assets/slot/item/cherry.png')), 22, "price", 2),
+    SlotItem(3, "🍋", pygame.image.load(os.path.join(data_path, 'assets/slot/item/lemon.png')), 22, "price", 2),
     SlotItem(4, "💰", pygame.image.load(os.path.join(data_path, 'assets/slot/item/bigprize.png')), 2, "price", 15),
-    SlotItem(5, "🎲", pygame.image.load(os.path.join(data_path, 'assets/slot/item/freespin.png')), 4, "scatter", 5),
-    SlotItem(6, "🃏", pygame.image.load(os.path.join(data_path, 'assets/slot/item/game.png')), 10, "bonus", 5),
+    SlotItem(5, "🎲", pygame.image.load(os.path.join(data_path, 'assets/slot/item/freespin.png')), 2, "scatter", 5),
+    SlotItem(6, "🃏", pygame.image.load(os.path.join(data_path, 'assets/slot/item/game.png')), 8, "bonus", 5),
     SlotItem(7, "👑", pygame.image.load(os.path.join(data_path, 'assets/slot/item/jackpot.png')), 1, "price", 25),
     SlotItem(8, "🍀", pygame.image.load(os.path.join(data_path, 'assets/slot/item/wildcard.png')), 3, "wild", 0)
 ]
