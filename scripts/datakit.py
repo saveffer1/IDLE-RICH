@@ -235,6 +235,33 @@ class MusicList(DCList):
 class LanguageList(DCList):
     def name(self, index:int):
         return self.__getitem__(index)
+    
+class LimitedQueue:
+    def __init__(self, max_size:int=5):
+        self._queue = []
+        self.max_size = max_size
+    
+    def enqueue(self, item):
+        if len(self.queue) >= self.max_size:
+            self.dequeue()
+        self.queue.append(item)
+    
+    def dequeue(self):
+        self.queue.pop(0)
+        
+    @property
+    def queue(self):
+        return self._queue
+    
+    def __getitem__(self, index):
+        return self.queue[index]
+    
+    def __len__(self):
+        return len(self.queue)
+    
+    def __str__(self):
+        return str(self.queue)
+    
 
 if __name__ == "__main__":
     raise RuntimeError("This module is not meant to run on its own!")

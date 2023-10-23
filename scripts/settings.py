@@ -101,18 +101,4 @@ BG = pygame.image.load(os.path.join(data_path,'assets/BG/screen.png'))
 
 WINDOW = pygame.image.load(os.path.join(data_path, "assets/BG/window.png"))
 
-# # Slot Machine assets
-# slot_img = {
-#     "banana": pygame.image.load(os.path.join(data_path,'assets/slot/item/banana.png')),
-#     "bigprize": pygame.image.load(os.path.join(data_path,'assets/slot/item/bigprize.png')),
-#     "cherry": pygame.image.load(os.path.join(data_path,'assets/slot/item/cherry.png')),
-#     "freespin": pygame.image.load(os.path.join(data_path,'assets/slot/item/freespin.png')),
-#     "game": pygame.image.load(os.path.join(data_path,'assets/slot/item/game.png')),
-#     "jackpot": pygame.image.load(os.path.join(data_path,'assets/slot/item/jackpot.png')),
-#     "lemon": pygame.image.load(os.path.join(data_path,'assets/slot/item/lemon.png')),
-#     "wildcard": pygame.image.load(os.path.join(data_path,'assets/slot/item/wildcard.png'))
-# }
-
 current_language = config.get("LANGUAGE", "CURRENT_LANGUAGE")
-
-reel_adj = 160

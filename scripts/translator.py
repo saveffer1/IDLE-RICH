@@ -28,6 +28,7 @@ class Translator:
 
 translator = Translator(current_lang=current_language)
 translator.load_translations(os.path.join(data_path,"config", "translations.json"))
+
 lang = LanguageList()
 [lang.append(key) for key in translator.translations.keys()]
 
