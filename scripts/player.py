@@ -2,7 +2,7 @@ class Player:
     def __init__(self, name):
         self._name = name
         self._auto_spin = 0
-        self._balance = 10000000000000
+        self._balance = 100
     
     @property
     def name(self):
