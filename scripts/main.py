@@ -20,6 +20,8 @@ class Game:
         self.game_music.set_volume(config.getint("AUDIO", "MUSIC_VOLUME") / 100)
         self.menu_music.set_volume(config.getint("AUDIO", "MUSIC_VOLUME") / 100)
         
+        self.slot_machine = SlotMachine(minbet=100)
+        
         pygame.display.set_icon(self.icon)
 
         self.states = {

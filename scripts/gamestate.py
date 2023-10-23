@@ -493,6 +493,9 @@ class Lobby(GameState):
         self.btn_playslot = TextButton(text=tl("btn_playslot"), x=self.surf_width//2 - 212//2, y=500)
         
         self.all_btn = [self.btn_buy, self.btn_playslot]
+        
+        self.slot_machine = self.game.slot_machine
+        self.lbl_player_balance = Label(text=str(self.slot_machine.player_balance), font_size=35, x=80, y=-4)
     
         # panel section
         self.buy_panel = Buy_Popup(width=500, height=500, x=400, y=200)
@@ -527,9 +530,11 @@ class Lobby(GameState):
             self.pause_panel.handle_events(event)
 
     def add_money(self, amount):
-        print((type(amount)), amount)
+        self.slot_machine.player_balance += amount
     
     def update(self):
+        self.lbl_player_balance.update(str(self.slot_machine.player_balance))
+        
         if not self.buy_panel.is_open() and not self.pause_panel.is_open():
             self.btn_pause.set_hover()
             self.btn_pause.collide_sound(SOUND_UISELECT)
@@ -552,6 +557,8 @@ class Lobby(GameState):
         self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
         self.surface.blit(self.navbar, (0, 0))
         self.surface.blit(self.play_image, (self.surf_width//2 - self.play_image.get_width()//2, self.surf_height//2 - self.play_image.get_height()//2))
+        
+        self.lbl_player_balance.draw()
         
         self.btn_pause.draw()
         for btn in self.all_btn:
@@ -576,17 +583,23 @@ class GamePlay(GameState):
         self.frame = pygame.image.load(os.path.join(data_path, "assets/BG/back.png"))
         
         self.image_home = pygame.image.load(os.path.join(data_path, "assets/gui/home_btn.png"))
-        self.btn_home = pygame.Rect(20, 50, self.image_home.get_width(), self.image_home.get_height())
+        self.btn_home = pygame.Rect(50, 90, self.image_home.get_width(), self.image_home.get_height())
         
         self.image_info = pygame.image.load(os.path.join(data_path, "assets/gui/info_btn.png"))
-        self.btn_info = pygame.Rect(1100, 50, self.image_info.get_width(), self.image_info.get_height())
+        self.btn_info = pygame.Rect(1150, 90, self.image_info.get_width(), self.image_info.get_height())
         
         self.image_paylines = pygame.image.load(os.path.join(data_path, "assets/gui/paylines.png"))
         # self.paylines = pygame.Rect(0, 0, )
         self.btn_paylines_close = IMGButton(type="close", x=self.image_paylines.get_width() - 200, y=80)
         self.paylines_show = False
         
-        self.slot_machine = SlotMachine(100)
+        self.slot_machine = self.game.slot_machine
+        self.lever = SlotLever(x=SCREEN_WIDTH//2 + 500, y=SCREEN_HEIGHT//2 - 40)
+        self.lever_state = False
+        self.lbl_player_balance = Label(text=str(self.slot_machine.player_balance), font_size=35, x=80, y=-4)
+        self.lbl_player_free_spin = Label(text=str(self.slot_machine.player_free_spin), font_size=35, x=770, y=-4)
+        
+        self.bet = 100
         
         self.start_time = pygame.time.get_ticks()
         self.delta_time = 0
@@ -603,12 +616,18 @@ class GamePlay(GameState):
                 if self.btn_info.collidepoint(event.pos):
                     GUI.clicked_sound(SOUND_BTNCLICK)
                     self.paylines_show = True
+                    
             elif event.button == 1 and self.paylines_show:
                 if self.btn_paylines_close.clicked():
                     GUI.clicked_sound(SOUND_BTNCLICK)
                     self.paylines_show = False
+
+        self.lever.handle_events(event, self.slot_machine.player_balance - self.bet >= 0)
     
     def update(self):
+        self.lbl_player_balance.update(str(self.slot_machine.player_balance))
+        self.lbl_player_free_spin.update(str(self.slot_machine.player_free_spin))
+        
         self.btn_paylines_close.set_hover()
         self.btn_paylines_close.collide_sound(SOUND_UISELECT)
         
@@ -619,12 +638,16 @@ class GamePlay(GameState):
         self.surface.fill("#000000")
         self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
         
-        self.slot_machine.update(self.delta_time)
+        self.slot_machine.update(self.delta_time, self.bet, pull_lever=self.lever.clicked())
         
         self.surface.blit(self.frame, (0, 0))
         self.surface.blit(self.image_home, self.btn_home)
         self.surface.blit(self.image_info, self.btn_info)
         
+        self.lever.draw()
+        
+        self.lbl_player_balance.draw()
+        self.lbl_player_free_spin.draw()
         
         if self.paylines_show:
             self.surface.blit(self.alpha_background, (0, 0))

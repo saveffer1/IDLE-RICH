@@ -466,5 +466,35 @@ class Buy_Popup(GUI):
             self.surface.blit(pygame.transform.scale(self.img_coin_2, (200, 200)), (self.shop_panel_rect.x + 350, self.shop_panel_rect.y + 100))
             self.surface.blit(pygame.transform.scale(self.img_coin_3, (200, 200)), (self.shop_panel_rect.x + 650, self.shop_panel_rect.y + 100))
 
+class SlotLever(GUI):
+    def __init__(self, width=250, height=50, x=0, y=0) -> None:
+        super().__init__(width, height, x, y)
+        self.image_idle = pygame.image.load(os.path.join(data_path, "assets/slot/machine/lever.png"))
+        self.image_active = pygame.image.load(os.path.join(data_path, "assets/slot/machine/lever_active.png"))
+        self.image = self.image_idle
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.click_time = 0
+        self._clicked = False
+    
+    def clicked(self):
+        return self._clicked
+    
+    def draw(self):
+        if time.time() - self.click_time >= 1.25:
+            self._clicked = False
+            self.image = self.image_idle
+        self.surface.blit(self.image, self.rect)
+    
+    def handle_events(self, event, enough_balance):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(event.pos) and enough_balance:
+                self._clicked = True
+                self.image = self.image_active
+                self.click_time = time.time()
+                # GUI.clicked_sound(SOUND_COLLECT)
+            else:
+                GUI.clicked_sound(SOUND_CANTCLICK)
+    
 if __name__ == "__main__":
     raise RuntimeError("This module is not meant to run on its own!")
