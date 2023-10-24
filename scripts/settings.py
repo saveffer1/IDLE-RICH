@@ -3,7 +3,6 @@ from configparser import ConfigParser
 import pygame
 import os
 from datakit import *
-import json
 
 script_directory = os.path.dirname(__file__)
 data_path = os.path.join(script_directory, "..")
@@ -22,7 +21,6 @@ SCREEN_HEIGHT = 720
 
 # load save file
 SAVEPATH = os.path.join(data_path,'config/savefile.sav')
-# SAVEPATH = os.path.join(data_path'config/save.json')
 
 # load sfx file
 mixer.init()
@@ -32,6 +30,8 @@ SOUND_COLLECT = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/collected.w
 SOUND_CANTCLICK = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/ui-cantclick.mp3'))
 SOUND_START = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/start.mp3'))
 SOUND_BUY = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/buy.wav'))
+SOUND_FLIPCARD = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/bonus/flipcard.mp3'))
+SOUND_OPENCHEST = mixer.Sound(os.path.join(data_path,'assets/audio/sfx/bonus/openchest.mp3'))
 
 # load sound with doubly circular linked list
 msc_ingame = MusicList()

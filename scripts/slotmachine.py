@@ -3,6 +3,7 @@ import pygame
 import random
 import slotitems
 from player import Player
+from settings import data_path, config
         
 class SlotSymbol(pygame.sprite.Sprite):
     def __init__(self, item_id, symbol, image, pos, idx):
@@ -31,8 +32,6 @@ class SlotReel:
             self.symbol_list.add(SlotSymbol(item.id, item.symbol, item.image, pos, idx))
             x, y = pos
             y += self.pos_adj
-            # if idx == 0:
-            #     y = self.pos_adj
             pos = [x, y]
             
     def animate(self, delta_time):
@@ -54,7 +53,6 @@ class SlotReel:
                     if symbol.rect.top == (self.pos_adj * 4):
                         if reel_is_stopping:
                             self.reel_is_spinning = False
-                            # self.stop_sound.play()
 
                         symbol_idx = symbol.idx
                         symbol.kill()
@@ -76,7 +74,12 @@ class SlotReel:
         return spin_symbols[::-1]
     
 class SlotMachine:
-    def __init__(self, minbet:int=100):
+    def __init__(self, minbet:int=100, player:Player=None):
+        
+        self.spin_sound = pygame.mixer.Sound(os.path.join(data_path, "assets/audio/sfx/slot/Spin.wav"))
+        self.win_sound = pygame.mixer.Sound(os.path.join(data_path, "assets/audio/sfx/slot/Win_26.wav"))
+        self.lose_sound = pygame.mixer.Sound(os.path.join(data_path, "assets/audio/sfx/slot/Lose_14.wav"))
+        
         self.slot_items = slotitems.items
         self.paytables = [
             [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4)],
@@ -90,8 +93,11 @@ class SlotMachine:
             [(0, 0), (1, 1), (2, 2), (1, 3), (0, 4)]
         ]
         
-        self.player = Player("Player")
-        self.player_bet = 0
+        if player is None:
+            self.player = Player("Player")
+        else:
+            self.player = player
+        self.player_bet = self.player.current_bet
         self.player_balance = self.player.balance
         self.player_free_spin = self.player.auto_spin
         self.min_bet = minbet
@@ -104,6 +110,8 @@ class SlotMachine:
         self.pos_adj = 160
         self.reel_index = 0
         self.reel_list = {}
+        
+        self.cur_bonus_level = 0
         
         self.spawn_reels()
     
@@ -121,6 +129,11 @@ class SlotMachine:
             self.reel_index += 1
     
     def cooldown(self):
+        sfx_vol = config.getint("AUDIO", "SFX_VOLUME") / 100
+        self.spin_sound.set_volume(sfx_vol * 0.5)
+        self.win_sound.set_volume(sfx_vol + 0.2)
+        self.lose_sound.set_volume(sfx_vol + 0.4)
+        
         for reel in self.reel_list:
             if self.reel_list[reel].reel_is_spinning:
                 self.can_toggle = False
@@ -158,12 +171,9 @@ class SlotMachine:
                     for i in payline:
                         win_symbols[i] = True
             
-            print()
-            print(f"pay table {index}")
             for i in range(5):
                 if win_symbols[i]:
                     win_amount += self.payout(mapped_table_reel[i])
-                    print(mapped_table_reel[i], self.payout(mapped_table_reel[i]), win_amount)
 
         win_amount = win_amount * (self.player_bet * 0.1)
         
@@ -202,10 +212,6 @@ class SlotMachine:
         print(horizontal_line)
     
     def spin(self, bet, pull_lever=False):
-        keys = pygame.key.get_pressed()
-
-        # Checks for space key, ability to toggle spin, and balance to cover bet size
-        # if keys[pygame.K_SPACE] and self.can_toggle:
         if self.can_toggle and pull_lever:
             
             self.spin_time = pygame.time.get_ticks()
@@ -214,7 +220,7 @@ class SlotMachine:
             
             for reel in self.reel_list:
                 self.reel_list[reel].start_spin(int(reel) * 200)
-                # self.spin_sound.play()
+                self.spin_sound.play()
                 self.win_animation_ongoing = False
         
         if not self.can_toggle and [self.reel_list[reel].reel_is_spinning for reel in self.reel_list].count(False) == 5:
@@ -246,21 +252,27 @@ class SlotMachine:
         else:
             self.player_balance -= bet_amount
         
+        self.cur_bonus_level = 0
+        
         result, bonus_count, free_spin_count = self.get_result()
         payout = self.check_wins(result)
 
+        self.cur_bonus_level = bonus_count
+        
         self.print_reels(result)
         print(f"Special: bonus-level({bonus_count}) freespin({free_spin_count})")
         
         self.player_free_spin += free_spin_count
         
         if payout > 0:
+            self.win_sound.play()
             print(f"You won {payout} coins!")
             self.player_balance += (payout + self.player_bet)
         else:
+            self.lose_sound.play()
             print(f"No win this time.")
 
         print(f"Balance: {self.player_balance} coins\n")
 
 if __name__ == "__main__":
-    exec(open("scripts/main.py").read())
+    raise Exception('This is not a standalone file, please run main.py instead')

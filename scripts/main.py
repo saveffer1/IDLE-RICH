@@ -1,11 +1,11 @@
 import pygame, ctypes
 from pygame import mixer
 from settings import *
-from gamestate import *
+from state import *
 from system import Options
 from translator import tl
 import threading
-
+from bonuslvl import *
 # ctypes.windll.user32.SetProcessDPIAware()
 
 class Game:
@@ -20,7 +20,10 @@ class Game:
         self.game_music.set_volume(config.getint("AUDIO", "MUSIC_VOLUME") / 100)
         self.menu_music.set_volume(config.getint("AUDIO", "MUSIC_VOLUME") / 100)
         
-        self.slot_machine = SlotMachine(minbet=100)
+        self.save_game = SaveData()
+        self.save_data = self.save_game.data
+        self.player = Player(self.save_data["name"], self.save_data["balance"], self.save_data["auto_spin"], self.save_data["current_bet"])
+        self.slot_machine = SlotMachine(minbet=100, player=self.player)
         
         pygame.display.set_icon(self.icon)
 
@@ -51,11 +54,11 @@ class Game:
             "option_menu": OptionMenu(self),
             "credit_menu": CreditMenu(self),
             "lobby_menu": Lobby(self),
-            "game_play": GamePlay(self)
+            "game_play": GamePlay(self),
+            "bonus1": Bonus1(self),
+            "bonus2": Bonus2(self)
         }
-        self.save_game = SaveData()
-        self.save_data = self.save_game.data
-        self.balance = self.save_game.player_coins
+        
         self.loading_complete.clear()
         self.change_state("main_menu")
         
@@ -80,6 +83,14 @@ class Game:
             self.menu_music.set_volume(config.getint("AUDIO", "MUSIC_VOLUME") / 100)
             self.game_music.set_volume((config.getint("AUDIO", "MUSIC_VOLUME") / 100))
             self.states[self.current_state].render()
+            
+            self.player = self.slot_machine.player
+            self.save_data["name"] = self.player.name
+            self.save_data["balance"] = self.slot_machine.player_balance
+            self.save_data["auto_spin"] = self.slot_machine.player_free_spin
+            self.save_data["current_bet"] = self.slot_machine.player_bet
+            
+            self.save_game.save_data(self.save_data)
             
 if __name__ == "__main__":
     game = Game()

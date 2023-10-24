@@ -56,7 +56,6 @@ class SaveData:
             self.reset_data()
         
         self.load_data()
-        self.player_coins = self.data["coins"]
     
     def load_data(self):
         with open(SAVEPATH, 'rb') as savefile:
@@ -72,10 +71,12 @@ class SaveData:
     
     def reset_data(self):
         data = {
-            "coins": Decimal(0),
+            "name": "Player",
+            "balance": 100,
+            "auto_spin": 0,
+            "current_bet": 100
         }
         self.save_data(data)
 
 if __name__ == "__main__":
     raise Exception('This is not a standalone file, please run main.py instead')
-    

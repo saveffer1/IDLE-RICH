@@ -22,7 +22,9 @@
         "credit": "Project Name: Idle Rich\nConcept: Idle clicker & slot machine casino game\nThis game is made by: Wiraphat Prasomphong\n\nFaculty of Engineering, KMITL\nComputer Engineering Continue (CEDT), 65015143\n01076110 Object Oriented Data Structures Project",
         "btn_main_menu": "Main Menu",
         "btn_resume" : "Resume",
-        "btn_playslot": "Let's Play"
+        "btn_playslot": "Let's Play",
+        "claim_reward": "Claim",
+        "bonus_reward": "You got:"
     },
     "th":{
         "title": "ไอเดิลริช",
@@ -47,6 +49,8 @@
         "credit": "ชื่อโปรเจค: ไอเดิลริช\n\nคอนเซ็ปต์: เกมส์คลิกเก็บเงินและเกมส์สล็อต\n\nผู้จัดทำ: วีรภัทร ประสมพงษ์\n\n\nคณะวิศวกรรมศาสตร์ สาขาวิศวกรรมคอมพิวเตอร์\n\nหลักสูตรต่อเนื่อง(CEDT), 65015143\n\n01076110 โครงงานโครงสร้างข้อมูลแบบเชิงวัตถุ",
         "btn_main_menu": "หน้าหลัก",
         "btn_resume": "เล่นต่อ",
-        "btn_playslot": "ลุยกันเลย"
+        "btn_playslot": "ลุยกันเลย",
+        "claim_reward": "รับรางวัล",
+        "bonus_reward": "ได้รับ:"
     }
 }

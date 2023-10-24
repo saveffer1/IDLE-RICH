@@ -465,12 +465,15 @@ class Buy_Popup(GUI):
             self.surface.blit(pygame.transform.scale(self.img_coin_1, (200, 200)), (self.shop_panel_rect.x + 50, self.shop_panel_rect.y + 100))
             self.surface.blit(pygame.transform.scale(self.img_coin_2, (200, 200)), (self.shop_panel_rect.x + 350, self.shop_panel_rect.y + 100))
             self.surface.blit(pygame.transform.scale(self.img_coin_3, (200, 200)), (self.shop_panel_rect.x + 650, self.shop_panel_rect.y + 100))
-
+    
 class SlotLever(GUI):
     def __init__(self, width=250, height=50, x=0, y=0) -> None:
         super().__init__(width, height, x, y)
+        self.pull_sound = pygame.mixer.Sound(os.path.join(data_path, "assets/audio/sfx/slot/Pull Lever.wav"))
+        
         self.image_idle = pygame.image.load(os.path.join(data_path, "assets/slot/machine/lever.png"))
         self.image_active = pygame.image.load(os.path.join(data_path, "assets/slot/machine/lever_active.png"))
+        
         self.image = self.image_idle
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
@@ -481,6 +484,8 @@ class SlotLever(GUI):
         return self._clicked
     
     def draw(self):
+        vol = config.getint("AUDIO", "SFX_VOLUME") / 100
+        self.pull_sound.set_volume(vol + 0.2)
         if time.time() - self.click_time >= 1.25:
             self._clicked = False
             self.image = self.image_idle
@@ -492,7 +497,7 @@ class SlotLever(GUI):
                 self._clicked = True
                 self.image = self.image_active
                 self.click_time = time.time()
-                # GUI.clicked_sound(SOUND_COLLECT)
+                # GUI.clicked_sound(self.pull_sound)
             else:
                 GUI.clicked_sound(SOUND_CANTCLICK)
     

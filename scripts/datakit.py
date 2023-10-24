@@ -235,33 +235,55 @@ class MusicList(DCList):
 class LanguageList(DCList):
     def name(self, index:int):
         return self.__getitem__(index)
-    
+
 class LimitedQueue:
     def __init__(self, max_size:int=5):
         self._queue = []
         self.max_size = max_size
     
     def enqueue(self, item):
-        if len(self.queue) >= self.max_size:
+        if len(self._queue) >= self.max_size:
             self.dequeue()
-        self.queue.append(item)
+        self._queue.append(item)
     
     def dequeue(self):
-        self.queue.pop(0)
+        self._queue.pop(0)
         
-    @property
     def queue(self):
         return self._queue
     
     def __getitem__(self, index):
-        return self.queue[index]
+        return self._queue[index]
     
     def __len__(self):
-        return len(self.queue)
+        return len(self._queue)
     
     def __str__(self):
-        return str(self.queue)
+        return str(self._queue)
+
+class Stack:
+    def __init__(self):
+        self._stack = []
     
+    def stack(self):
+        return self._stack
+    
+    def push(self, item):
+        self._stack.append(item)
+    
+    def pop(self):
+        return self._stack.pop()
+    
+    def peek(self):
+        return self._stack[-1]
+    
+    def __len__(self):
+        return len(self._stack)
+
 
 if __name__ == "__main__":
     raise RuntimeError("This module is not meant to run on its own!")
+    # q = LimitedQueue(max_size=4)
+    # for i in range(10):
+    #     q.enqueue(i)
+    #     print(q)
