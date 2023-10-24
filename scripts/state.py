@@ -587,7 +587,6 @@ class GamePlay(GameState):
         self.btn_subbet.set_hover()
         
         self.slot_machine.player_bet = self.bet
-        print(self.slot_machine.player_bet)
         
         if self.paylines_show:
             self.btn_paylines_close.set_hover()
