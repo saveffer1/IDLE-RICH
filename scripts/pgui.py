@@ -4,6 +4,7 @@ from pygame import mixer
 from settings import *
 from datakit import MusicList
 from translator import tl
+import time
 
 class GUI:
     def __init__(self, width=250, height=50, x=0, y=0) -> None:
