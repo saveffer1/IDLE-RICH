@@ -33,12 +33,20 @@ class LoadingStage(GameState):
         self.loading_font = pygame.font.Font(FONT, 70)
         self.loading_animation = ""
         
+        self.kittens = [pygame.image.load(os.path.join(data_path, f'assets/kitten/white-kitten{i}.png')) for i in range(1, 9)]
+        self.k_index = 0
+        
     def load(self):
         """
         Loads the game while displaying a loading animation.
         """
         load_count = 0
         while self.game.loading_complete.is_set():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                    
             self.loading_animation += "."
             if len(self.loading_animation) > 3:
                 self.loading_animation = ""
@@ -48,10 +56,10 @@ class LoadingStage(GameState):
             textrect = textsurf.get_rect(center=self.game.screen.get_rect().center)
             self.surface.blit(textsurf, textrect)
         
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+            self.surface.blit(pygame.transform.scale(self.kittens[self.k_index], (150, 150)), (self.surf_width - 170, self.surf_height//2 + 200))
+            self.k_index += 1
+            if self.k_index > 9:
+                self.k_index = 0
             
             pygame.display.update()
             self.clock.tick(self.fps)
@@ -613,6 +621,8 @@ class GamePlay(GameState):
                 self.game.change_state("bonus1")
             elif self.slot_machine.cur_bonus_level == 2:
                 self.game.change_state("bonus2")
+            elif self.slot_machine.cur_bonus_level >= 3:
+                self.game.change_state("bonus3")
             
             self.slot_machine.cur_bonus_level = 0
             
@@ -638,5 +648,4 @@ class GamePlay(GameState):
         self.clock.tick(self.fps)
         
 if __name__ == "__main__":
-    # raise Exception('This is not a standalone file, please run main.py instead')
-    exec(open("scripts/main.py").read())
+    raise Exception('This is not a standalone file, please run main.py instead')

@@ -31,7 +31,7 @@ class Game:
             "loading": LoadingStage(self),
         }
         
-        self.current_state = tl("loading")
+        self.current_state = "loading"
         self.prev_state = None
         
         self.loading_complete = threading.Event()
@@ -56,7 +56,8 @@ class Game:
             "lobby_menu": Lobby(self),
             "game_play": GamePlay(self),
             "bonus1": Bonus1(self),
-            "bonus2": Bonus2(self)
+            "bonus2": Bonus2(self),
+            "bonus3": Bonus3(self),
         }
         
         self.loading_complete.clear()

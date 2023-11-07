@@ -58,24 +58,24 @@ class Chest(pygame.sprite.Sprite):
 
     def draw(self):
         self.surface.blit(self.image, self.rect.topleft)
-    
+        
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, width, x, y, color, speed):
+    def __init__(self, w, h, x, y, color, speed):
         super().__init__()
         self.surface = pygame.display.get_surface()
-        self.w = width
-        self.h = 30
+        self.w = w
+        self.h = h
         self.x = x
         self.y = y
         self.color = color
         self.speed = speed
-        
+    
+    def draw(self):
+        pygame.draw.rect(self.surface, self.color, (self.x, self.y, self.w, self.h))
+    
     def move(self):
         self.x += self.speed
         if self.x > self.surface.get_width():
             self.speed *= -1
         if self.x + self.w < 1:
             self.speed *= -1
-    
-    def draw(self):
-        pygame.draw.rect(self.surface, self.color, (self.x, self.y, self.w, self.h))

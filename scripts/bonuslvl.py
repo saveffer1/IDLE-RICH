@@ -169,3 +169,106 @@ class Bonus2(GameState):
 class Bonus3(GameState):
     def __init__(self, game):
         super().__init__(game)
+        
+        self.slotmachine = self.game.slot_machine
+        self.reward = 0
+        self.btn_claim = TextButton(tl("claim_reward"), x=525, y=450)
+        self.lbl_reward = Label(f'{tl("bonus_reward")} {self.reward}', font_size=50, x=540, y=350)
+        
+        self.init()
+    
+    def init(self):
+        self.brickH = 10
+        self.brickW = 100
+        
+        self.score = 0
+        self.speed = 8
+
+        self.brickstk = Stack()
+        
+        self.is_over = False
+        
+        self.initSize = 25
+        for i in range(self.initSize):
+            self.brickstk.push(Brick(self.brickW, self.brickH, self.surf_width/2 - self.brickW, self.surf_height - (i + 1)*self.brickH, self.random_color(), 0))
+
+        self.add_brick()
+        
+    def show(self):
+        for i in range(self.initSize):
+            self.brickstk.stack()[i].draw()
+
+    def move(self):
+        for i in range(self.initSize):
+            self.brickstk.stack()[i].move()
+    
+    def random_color(self):
+        return (random.randrange(10, 255), random.randrange(10, 255), random.randrange(10, 255))
+    
+    def add_brick(self):
+        y = self.brickstk.stack()[self.initSize - 1].y
+        if self.score > 50:
+            self.speed += 0
+        elif self.score%5 == 0:
+            self.speed += 1
+        
+        self.initSize += 1
+        self.brickstk.push(Brick(self.brickW, self.brickH, self.surf_width, y - self.brickH, self.random_color(), self.speed))
+    
+    def push_brick(self):
+        b = self.brickstk.stack()[self.initSize - 2]
+        b2 = self.brickstk.stack()[self.initSize - 1]
+        if b2.x <= b.x and not (b2.x + b2.w < b.x):
+            self.brickstk.stack()[self.initSize - 1].w = self.brickstk.stack()[self.initSize - 1].x + self.brickstk.stack()[self.initSize - 1].w - b.x
+            self.brickstk.stack()[self.initSize - 1].x = b.x
+            if self.brickstk.stack()[self.initSize - 1].w > b.w:
+                self.brickstk.stack()[self.initSize - 1].w = b.w
+            self.brickstk.stack()[self.initSize - 1].speed = 0
+            self.score += 1
+        elif b.x <= b2.x <= b.x + b.w:
+            self.brickstk.stack()[self.initSize - 1].w = b.x + b.w - b2.x
+            self.brickstk.stack()[self.initSize - 1].speed = 0
+            self.score += 1
+        else:
+            self.is_over = True
+            self.gameOver()
+        for i in range(self.initSize):
+            self.brickstk.stack()[i].y += self.brickH
+
+        self.brickW = self.brickstk.stack()[self.initSize - 1].w
+    
+    def gameOver(self):
+        self.reward = self.score * 100
+        self.slotmachine.player_balance += self.reward
+    
+    def handle_events(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.is_over:
+                    if self.btn_claim.clicked():
+                        self.reward = 0
+                        self.is_over = False
+                        self.init()
+                        self.game.change_state("game_play")
+                else:
+                    self.push_brick()
+                    self.add_brick()
+    
+    def update(self):
+        if self.is_over:
+            self.lbl_reward.text = f'{tl("bonus_reward")} {self.reward}'
+            self.btn_claim.set_hover()
+    
+    def render(self):
+        self.surface.fill("#000000")
+        self.surface.blit(pygame.transform.scale(BG, (self.surf_width, self.surf_height)), (0, 0))
+        
+        self.move()
+        self.show()
+        
+        if self.is_over:
+            self.lbl_reward.draw()
+            self.btn_claim.draw()
+                
+        pygame.display.update()
+        self.clock.tick(self.fps)
